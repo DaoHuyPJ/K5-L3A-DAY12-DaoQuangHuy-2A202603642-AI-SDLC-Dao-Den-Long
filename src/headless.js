@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Headless runner — Test Contract v1.0.
-// node src/headless.js --seed <int> --night 1 [--scenario f.json] [--inputs f.json]
+// Headless runner — Test Contract v1.1.
+// node src/headless.js --seed <int> --night <1|2|3> [--scenario f.json] [--inputs f.json]
 //                      --ticks <int> --out <file.jsonl> [--snapshot-every <int, default 10>]
 // Exit codes: 0 ok, 1 usage/runtime error, 2 malformed inputs/scenario file.
 
@@ -33,7 +33,7 @@ function parseArgs(argv) {
   if (a.seed === undefined) throw new UsageError('--seed is required');
   if (a.ticks === undefined || a.ticks < 0) throw new UsageError('--ticks <int >= 0> is required');
   if (!a.out) throw new UsageError('--out is required');
-  if (a.night !== 1) throw new UsageError(`--night ${a.night} not available (only night 1)`);
+  if (![1, 2, 3].includes(a.night)) throw new UsageError(`--night ${a.night} not available (1, 2 or 3)`);
   if (a.snapshotEvery < 1) throw new UsageError('--snapshot-every must be >= 1');
   for (const k of ['scenario', 'inputs']) if (k in a && !a[k]) throw new UsageError(`--${k} needs a file path`);
   return a;
@@ -57,7 +57,7 @@ export function run(argv) {
   const args = parseArgs(argv);
   const scenario = args.scenario ? parseScenario(readJson(args.scenario, 'scenario')) : {};
   const frames = args.inputs ? parseInputs(readJson(args.inputs, 'inputs')) : [];
-  const game = createGame({ seed: args.seed, scenario });
+  const game = createGame({ seed: args.seed, night: args.night, scenario });
   const timeline = new InputTimeline(frames);
 
   const fd = fs.openSync(args.out, 'w');
@@ -70,8 +70,10 @@ export function run(argv) {
     }
   };
   write(snapshot(game));
+  write({ type: 'event', tick: 0, name: 'night_start', data: { night: args.night } });
   let k = 0;
-  while (k < args.ticks && game.state === 'playing') {
+  const over = () => game.state === 'won' || game.state === 'lost';
+  while (k < args.ticks && !over()) {
     for (const e of step(game, timeline.at(k))) write(e);
     k++;
     if (k % args.snapshotEvery === 0) write(snapshot(game));
