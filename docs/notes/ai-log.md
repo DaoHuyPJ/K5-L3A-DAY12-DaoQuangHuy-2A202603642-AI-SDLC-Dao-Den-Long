@@ -54,3 +54,20 @@ Công cụ: **Claude Code** (model Claude Opus 5.5) trong VS Code. Harness: `AGE
 - **Chứng minh Stop hook:** chạy hook với lỗi cài cố ý → exit 2 + danh sách test đỏ; khôi phục → exit 0 (`docs/proof/phase-2/hook-check.md`).
 - **Clone sạch — AI viết kết luận sai:** script tự in "giống từng byte" trong khi `git status` báo 118/118 file thay đổi (đã commit nhầm ở ebe5102). Kiểm lại: chỉ khác ký tự xuống dòng (LF/CRLF trên Windows). Sửa gốc bằng `.gitattributes eol=lf`, chạy lại clone mới: 0/118 khác, ghi đính chính trong `clean-clone.md`. Bài học: câu kết luận trong bằng chứng phải được tính từ kết quả kiểm, không viết sẵn.
 - Token ước tính thêm cho vòng này: ~80k vào, ~20k ra.
+
+## Phase 3 (2026-11-20) — Ticket-03 "Đèn cạn dầu" (Change Request)
+
+**Lời nhắc chính:** người dùng gửi ticket theo từng phần (ảnh chụp + văn bản). Agent tóm tắt cách hiểu sau mỗi phần, liệt kê chỗ mơ hồ, **chỉ bắt đầu code khi đủ ticket** (luật cốt lõi bị thay, làm theo từng mẩu dễ sai).
+
+**Cách làm:** liệt kê luật [THAY THẾ] → mô hình trạng thái đèn trong ADR 0001 → sửa sim (dầu số nguyên 1/60, `zoneActive`, `drain`, thắng ở bình minh, sức chứa, điểm) → chạy test để thấy đúng 10 test cũ đỏ → sửa từng test có lý do (`[T03]`) + 19 scenario mới tính tay → mutation 16/16 → UI (thanh dầu, nhấp nháy 1 Hz, mù màu) → ảnh chụp → tài liệu.
+
+**AI sai / suýt sai:**
+- Patch script đầu tiên bị bash hiểu sai dấu nháy (heredoc dài) → chuyển sang file Python riêng có `assert` cho từng chỗ thay; không có thay đổi nửa vời.
+- Python trên Windows ghi file với CRLF → nhờ `.gitattributes eol=lf` (thêm ở Phase 2) nên repo vẫn LF; các patch sau ghi `newline='
+'`.
+- Ảnh chụp đầu tiên: mọi đèn đặt sẵn đều tắt ngay, nhãn "0/5" — hook `?autostart&lit=` bật `lit` mà không nạp dầu (theo mô hình cũ). Luật đúng; công cụ sai. Sửa + thêm quy tắc vào AGENTS.md: helper debug phải tạo trạng thái hợp lệ theo mô hình mới.
+- Phát hiện cạm bẫy số thực: `Math.ceil(0.6 * 5)` = 4 vì `0.6*5 = 3.0000000000000004` → làm tròn 6 chữ số trước khi `ceil` (ghi trong ADR, có Q12/Q14/Q16 kiểm ngưỡng).
+
+**Harness thay đổi:** AGENTS.md (v1.2, dầu 1/60, `zoneActive`, quy tắc ADR + CHANGELOG khi đổi luật, quy tắc helper debug), `submission-check.mjs` (kiểm ADR, changelog, test bị thay mỗi phase).
+
+**Token / chi phí (ước tính):** ~200k token vào, ~55k ra. Tiết kiệm: chờ đủ ticket rồi mới code (không phải làm lại), patch bằng file có assert thay vì đọc/ghi lại file lớn, scenario dạng dữ liệu.
