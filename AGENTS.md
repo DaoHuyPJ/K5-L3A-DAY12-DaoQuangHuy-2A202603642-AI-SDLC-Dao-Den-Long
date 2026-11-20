@@ -1,6 +1,6 @@
 # AGENTS.md — Đảo Đèn Lồng
 
-3D lantern game, 3 nights, + headless mode graded by **Test Contract v1.2** (Ticket-02 + Ticket-03 change request). Notes: `docs/notes/phase-N.md`, decisions: `docs/adr/`.
+3D lantern game, 3 nights, + headless mode graded by **Test Contract v1.3** (Ticket-02 + Ticket-03 change request + Ticket-04 release). Notes: `docs/notes/phase-N.md`, decisions: `docs/adr/`.
 
 ## Commands
 - Install: `npm install` (only dep: three) · Play: `npm start` → http://localhost:8080 (`?fps` FPS counter, `?bench` FPS run)
@@ -9,6 +9,7 @@
 - Screenshot (server running): `node scripts/screenshot.mjs <dir> <name> "autostart&night=2&lit=1"` — then LOOK at the png
 - FPS proof (real time, GPU): `FPS_UNCAPPED=1 node scripts/measure-fps.mjs phase-N 30` → `docs/proof/phase-N/fps.json` (invalid if the page was ever hidden)
 - Lab requirement checklist: `docs/proof/compliance.md` + `node scripts/submission-check.mjs --online` (SUBMISSION §7, writes docs/proof/submission-check.md) — run before every tag; the final hand-in must have no FAIL/TODO
+- Bench (bench_cmd): `node scripts/bench.mjs --seed 42 --duration 30 --out bench.json` (opens a 1280x720 window) · Soak: `npm run soak` · Leaderboard export: `node server.js --export-leaderboard out.json` · Release zip: `npm run package`
 - Web build for claude.ai artifact / static hosting: `npm run build:web` → `dist/web/`
 
 ## Layout
@@ -31,4 +32,6 @@
 - Visuals must not suggest a state the sim does not have (e.g. only `lit` lanterns may glow). Put such rules in pure helpers under `src/game/` and unit-test them (`tests/ui.test.mjs`).
 - A measurement only counts if its conditions are valid (page visible, GPU named, duration stated); never average over stalls you have not explained.
 - Never hard-code a conclusion in generated evidence; compute it from the check's result (pass/fail text comes from the exit code or the count).
+- Rendering: many identical objects (shades, motes) use InstancedMesh; HUD writes DOM only when text changes (`setText`). Re-run the bench after UI changes.
+- `src/sim/bench.js` + the `bench` flag must never change normal headless output.
 - Small commits, one concern each. Tag `phase-N` only after `npm run verify -- phase-N` passes.

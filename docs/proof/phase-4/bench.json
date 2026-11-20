@@ -1,0 +1,18 @@
+{
+  "contract_version": "1.3",
+  "avg_fps": 97.5,
+  "p1_low_fps": 48.1,
+  "frame_ms_p95": 13.2,
+  "frames": 2926,
+  "load_ms": 1034,
+  "peak_mem_mb": 1378,
+  "vsync_off": true,
+  "renderer": "three.js r160 WebGL2 · ANGLE (Intel, Intel(R) UHD Graphics (0x00009BC4) Direct3D11 vs_5_0 ps_5_0, D3D11) · Edg/157.0.4341.60",
+  "os": "Windows_NT 10.0.26100 (win32 x64) · Intel(R) Core(TM) i7-10870H CPU @ 2.20GHz · 16 threads · 16 GB RAM",
+  "seed": 42,
+  "duration_s": 30,
+  "viewport": "1280x720",
+  "window": "windowed 1280x720",
+  "measured_at": "2026-11-20T09:43:48.206Z",
+  "notes": "peak_mem_mb = peak sum of RSS over all browser processes of this run (multi-process browser), sampled every ~1 s; null if the OS query failed"
+}

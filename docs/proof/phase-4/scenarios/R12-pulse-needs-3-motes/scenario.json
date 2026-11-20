@@ -1,0 +1,25 @@
+{
+  "random_motes": false,
+  "random_shades": false,
+  "random_drifters": false,
+  "wind_enabled": false,
+  "motes": [],
+  "shades": [
+    {
+      "pos": [
+        3,
+        0,
+        0
+      ]
+    }
+  ],
+  "drifters": [],
+  "player": {
+    "pos": [
+      0,
+      0,
+      0
+    ],
+    "carried": 2
+  }
+}

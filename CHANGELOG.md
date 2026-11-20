@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.0.0 / phase-4 — Ticket-04 "Bình minh: phát hành v1.0.0" (Contract v1.3)
+
+### Added
+- **Benchmark** `bench_cmd` = `node scripts/bench.mjs --seed 42 --duration 30 --out bench.json`: windowed 1280×720, vsync off, standard scene (200 wander shades, 100 motes, L1–L3 at fuel 100, orbit camera), avg/p1-low/p95/frames/load/peak RSS.
+- **Soak** `soak_cmd` = `node --expose-gc --no-opt --max-semi-space-size=1 scripts/soak.mjs --seed 7 --nights 10 --out soak.json` (10 nights in one process, seeded random input).
+- **Local leaderboard**: name entry after Dawn or any loss (3–12 chars, Vietnamese allowed), top 10, ties → earlier first, menu screen, `node server.js --export-leaderboard out.json`.
+- **Accessibility**: rebind every action with duplicate warning + reset, captions/visual cues (shade spawn + edge arrow, wind, last 10 s, fuel < 30), reduced motion, UI text ≥ 18 px + large text ×1.25.
+- Release asset `npm run package` → `dist/dao-den-long-v1.0.0-web.zip`; retro; video script.
+
+### Changed
+- Contract v1.3: `contract_version`, `bench_cmd`, `soak_cmd`; **`run_cmd` is now `node server.js`** (was `npm start`) so extra flags reach the program.
+- Shades and motes rendered with InstancedMesh; HUD writes DOM only on change (`p1_low_fps` 24.8 → 48.1 in the benchmark).
+- Leaderboard POST body decoded once as UTF-8.
+
 ## phase-3 — Ticket-03 "Đèn cạn dầu" (Contract v1.2)
 
 ### Breaking changes

@@ -1,13 +1,21 @@
 # Đảo Đèn Lồng
 
-> **Video demo:** _(sẽ thêm ở Phase 4, Release `v1.0.0`)_
+> **Video demo:** _(link video sẽ đặt ở đây — đính kèm GitHub Release `v1.0.0`)_ · **Bản chạy được:** GitHub Release `v1.0.0` → `dao-den-long-v1.0.0-web.zip`
 
-Game 3D góc nhìn thứ ba (Three.js, chạy trên trình duyệt), 3 Đêm, + chế độ headless theo **Test Contract v1.2**.
+![Đêm 1 — Đảo Bến](docs/proof/phase-4/screenshots/hud-18px.png)
+
+Game 3D góc nhìn thứ ba (Three.js, chạy trên trình duyệt), 3 Đêm, + chế độ headless, benchmark và soak test theo **Test Contract v1.3**.
 Mây, người giữ đèn nhỏ tuổi đội nón lá, gom đom đóm để thắp và **giữ cho các Đèn Lồng Lớn còn sáng tới bình minh** — đèn cạn dầu sẽ tắt, Bóng Mực hút dầu đèn yếu.
 
 Bài lab Day 12 AI SDLC — đề bài gốc ở [docs/lab/](docs/lab/README.md) và lab board.
 
-## Cài đặt và chạy (macOS / Linux / Windows, cần Node.js ≥ 18)
+## Yêu cầu hệ thống
+
+- Node.js ≥ 18 (đã thử Node 24) trên macOS, Linux hoặc Windows.
+- Trình duyệt có WebGL2: Chrome / Chromium / Edge (bench cần một trong ba; đặt `CHROME_PATH` nếu không ở vị trí mặc định), Firefox chơi được.
+- GPU tích hợp là đủ (đo trên Intel UHD: benchmark 97.5 FPS trung bình). Không cần internet khi chạy từ repo.
+
+## Cài đặt và chạy (macOS / Linux / Windows)
 
 ```bash
 npm install        # cài three.js (dependency duy nhất)
@@ -25,9 +33,20 @@ node src/headless.js --seed 1 --night 1 --ticks 600 --out out.jsonl [--scenario 
 Kiểm thử và bằng chứng:
 
 ```bash
-npm test                    # 99 test: unit + 64 scenario headless + contract/CLI + tất định + hiệu năng + quy tắc UI
-npm run verify -- phase-3   # chạy lại scenario, sinh docs/proof/phase-3/results.md
+npm test                    # 114 test: unit + 64 scenario headless + contract/CLI + bench/soak/bảng xếp hạng/UI
+npm run verify -- phase-4   # chạy lại scenario, sinh docs/proof/phase-4/results.md
 ```
+
+Benchmark, soak test, bảng xếp hạng (Ticket-04):
+
+```bash
+node scripts/bench.mjs --seed 42 --duration 30 --out bench.json      # mở cửa sổ 1280×720, tắt vsync, tự thoát (bench_cmd)
+node --expose-gc --no-opt --max-semi-space-size=1 scripts/soak.mjs --seed 7 --nights 10 --out soak.json   # soak_cmd
+node server.js --export-leaderboard out.json                          # xuất bảng xếp hạng {"entries": [...]}
+npm run package                                                        # gói bản web tĩnh cho Release v1.0.0
+```
+
+Bench không tắt được vsync trên mọi trình duyệt bằng API của trang, nên `bench.mjs` khởi chạy Chrome/Edge với `--disable-gpu-vsync --disable-frame-rate-limit`; số đo của mình: [docs/proof/phase-4/bench.json](docs/proof/phase-4/bench.json), [soak.json](docs/proof/phase-4/soak.json).
 
 ## Điều khiển
 
@@ -42,7 +61,11 @@ npm run verify -- phase-3   # chạy lại scenario, sinh docs/proof/phase-3/res
 | F | Tỏa Sáng: tốn 3 đom đóm, choáng + đẩy lùi Bóng Mực trong 5 m |
 | Esc / P | Tạm dừng (Tiếp tục / Chơi lại Đêm / Cài đặt / Về menu) |
 
-Cài đặt (âm lượng, độ nhạy chuột, **Bảng màu dễ phân biệt** cho người mù màu) được lưu trong trình duyệt.
+Mọi phím (đi 4 hướng, nhảy, lướt, tương tác, tỏa sáng, tạm dừng) **đổi được** trong Cài đặt; trùng phím được tô đỏ và báo, có nút "Khôi phục mặc định".
+
+**Dễ tiếp cận** (Cài đặt, được lưu): Bảng màu dễ phân biệt · Phụ đề & chỉ báo hình ảnh (Bóng Mực xuất hiện kèm mũi tên mép màn hình, gió sắp thổi, 10 giây cuối, đèn sắp cạn dầu) · Giảm chuyển động (tắt chớp màn hình) · Chữ lớn ×1.25 (chữ UI tối thiểu 18 px ở 1280×720).
+
+**Bảng xếp hạng:** sau Bình Minh hoặc khi thua, nhập tên 3–12 ký tự (có dấu được) để lưu; xem top 10 từ menu chính. Lưu ở `data/leaderboard.json` (khi chạy `npm start`) hoặc trong trình duyệt (bản web tĩnh).
 
 ## Luật chơi
 
@@ -70,7 +93,7 @@ Ba Đêm nối tiếp: **Đêm 1 – Đảo Bến** (5 đèn, 240 s), **Đêm 2 
 
 Tổng điểm game là tổng điểm các Đêm đã thắng. Dựng scenario không cộng điểm.
 
-## Test Contract v1.2
+## Test Contract v1.3
 
 - [game.contract.json](game.contract.json) khai đúng các số chuẩn trong [src/sim/config.js](src/sim/config.js) (test so với số gõ tay từ ticket).
 - `shade_speed` là 4.0 (Đêm 1, 2); Đêm 3 dùng 4.5 theo ticket. Không có trường `null`.

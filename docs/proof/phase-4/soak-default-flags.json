@@ -1,0 +1,111 @@
+{
+  "nights": 10,
+  "crashes": 0,
+  "results": [
+    "lost",
+    "lost",
+    "lost",
+    "lost",
+    "lost",
+    "lost",
+    "lost",
+    "lost",
+    "lost",
+    "lost"
+  ],
+  "mem_start_mb": 38.1,
+  "mem_end_mb": 49.6,
+  "duration_s": 0.2,
+  "pass": false,
+  "seed": 7,
+  "gc_exposed": true,
+  "heap_used_start_mb": 4.5,
+  "heap_used_end_mb": 5,
+  "runtime_flags": [
+    "--expose-gc"
+  ],
+  "note": "RSS growth without flags is V8 JIT/young-gen native memory (JS heap stays flat); soak_cmd runs with --no-opt --max-semi-space-size=1 — see docs/proof/phase-4/soak.md",
+  "node": "v24.18.0",
+  "per_night": [
+    {
+      "night": 1,
+      "seed": 7,
+      "ticks": 3550,
+      "result": "lost",
+      "reason": "no_flames",
+      "score": 0
+    },
+    {
+      "night": 2,
+      "seed": 8,
+      "ticks": 1940,
+      "result": "lost",
+      "reason": "no_flames",
+      "score": 0
+    },
+    {
+      "night": 3,
+      "seed": 9,
+      "ticks": 5559,
+      "result": "lost",
+      "reason": "no_flames",
+      "score": 0
+    },
+    {
+      "night": 1,
+      "seed": 10,
+      "ticks": 2088,
+      "result": "lost",
+      "reason": "no_flames",
+      "score": 10
+    },
+    {
+      "night": 2,
+      "seed": 11,
+      "ticks": 1385,
+      "result": "lost",
+      "reason": "no_flames",
+      "score": 0
+    },
+    {
+      "night": 3,
+      "seed": 12,
+      "ticks": 2624,
+      "result": "lost",
+      "reason": "no_flames",
+      "score": 0
+    },
+    {
+      "night": 1,
+      "seed": 13,
+      "ticks": 1900,
+      "result": "lost",
+      "reason": "no_flames",
+      "score": 5
+    },
+    {
+      "night": 2,
+      "seed": 14,
+      "ticks": 4008,
+      "result": "lost",
+      "reason": "no_flames",
+      "score": 0
+    },
+    {
+      "night": 3,
+      "seed": 15,
+      "ticks": 2202,
+      "result": "lost",
+      "reason": "no_flames",
+      "score": 0
+    },
+    {
+      "night": 1,
+      "seed": 16,
+      "ticks": 2436,
+      "result": "lost",
+      "reason": "no_flames",
+      "score": 0
+    }
+  ]
+}

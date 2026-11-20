@@ -77,3 +77,20 @@ Công cụ: **Claude Code** (model Claude Opus 5.5) trong VS Code. Harness: `AGE
 Người dùng đề xuất repo `gamedev-skills/awesome-gamedev-agent-skills` (Apache-2.0). Agent clone vào thư mục tạm, **không chạy gì**, đọc và quét nội dung (chỉ Markdown, không script, không lệnh mạng/xóa, không câu chèn lệnh). Chỉ chọn 5/~80 skill hợp với Three.js + vấn đề đang mở (hiệu năng, UI/khả năng tiếp cận, juice), chép nguyên văn kèm LICENSE + NOTICE vào `.claude/skills/`, ghi CREDITS và quy tắc trong AGENTS.md: skill bên ngoài nhắm three r187, repo dùng 0.160 → luật dự án và ticket thắng. Lý do không cài cả bộ: mỗi skill thêm mô tả vào ngữ cảnh mọi lần chạy (tốn token), rubric chấm harness "nhỏ, hữu ích".
 
 - **Người dùng báo "chưa có chế độ mù màu":** tính năng có nhưng giấu trong Cài đặt và hiệu ứng quá nhỏ (agent chỉ kiểm bằng unit test + một ảnh chụp từ xa). Sửa: nút ở menu, huy hiệu HUD, vết rách chữ X, biểu tượng ✖/☀ trên nhãn; kiểm bằng ảnh so sánh cùng góc (phase-3.md §6).
+
+## Phase 4 (2026-11-20) — Ticket-04 "Bình minh: phát hành v1.0.0"
+
+**Cách làm:** ưu tiên phần chấm tự động (bench → soak → export bảng xếp hạng → contract v1.3), rồi checklist (dễ tiếp cận, tài liệu), cuối cùng đóng gói. Mỗi số đo đều chạy thật và lưu file.
+
+**AI sai / suýt sai:**
+- Bench lần đầu `p1_low_fps` 24.8 < 30 — không "làm tròn" con số mà đo nguyên nhân theo skill `performance-optimization`: ~1000 draw call → InstancedMesh (31.4), rồi HUD ghi DOM mỗi khung → chỉ ghi khi đổi (48.1).
+- Soak 1.30 > 1.2: thay vì kết luận "rò rỉ" hay "đạt", đo heap JS (phẳng) và từng vùng V8 → phần tăng là JIT/semi-space native. Chọn cờ runtime, lưu cả lần chạy cờ mặc định làm bằng chứng (`soak-default-flags.json`, `soak.md`).
+- Hai kỳ vọng test do AI tự tính sai (p95 = 40 trong khi chú thích tính ra 10; ngưỡng "> 15" khai báo font không đếm thật) → sửa test, không sửa code.
+- Mutation `p1_low` dùng "khung chậm thứ k" không bị bắt (dữ liệu test có các khung chậm bằng nhau) → thêm ca khác nhau.
+- Tên "Mây" bị từ chối khi gửi qua curl Windows → nghi bảng mã; vẫn sửa server ghép body một lần UTF-8 và thêm test e2e bằng `fetch`.
+- Lệnh bench treo lần đầu (Edge chạy lần đầu với profile mới) → mọi lời gọi DevTools có timeout 5 s.
+- Gói Release: `build-web` bỏ `<!doctype>` (cho artifact) → bản zip dùng HTML đầy đủ; nén zip trên Windows bằng `Compress-Archive` (máy không có `zip`).
+
+**Harness:** AGENTS.md (v1.3, lệnh bench/soak/package, quy tắc InstancedMesh + `setText`, cờ bench không đổi headless); script mới `bench.mjs`, `soak.mjs`, `package-release.mjs`.
+
+**Token (ước tính):** ~300k vào, ~80k ra.
