@@ -28,3 +28,19 @@ Công cụ: **Claude Code** (model Claude Opus 5.5) trong VS Code. Harness: `AGE
 **Token / chi phí (ước tính):** ~1 phiên agent, khoảng 150–200k token vào (phần lớn là đọc tài liệu lab + trang lab board ~180 KB HTML, chỉ trích phần văn bản ~10 KB) và ~45k token ra (code + tài liệu). Cách tiết kiệm: trích văn bản từ HTML thay vì đọc nguyên trang; không dùng subagent; viết scenario dạng dữ liệu dùng chung cho test và script bằng chứng; chạy test bằng CLI thật thay vì nhờ agent "đọc code để đoán".
 
 **Người review:** phần đánh giá cuối do người làm bài (tôi) chơi thử và đối chiếu bảng truy vết — không phải agent tự chấm.
+
+## Phase 2 (2026-11-20) — Ticket-02 "Ba hòn đảo"
+
+**Lời nhắc chính:** dán nguyên văn Ticket-02 + "phase 2". Lab board (bản agent đọc được) vẫn chỉ có Phase 1, nên bản dán là nguồn yêu cầu.
+
+**Cách làm:** đọc ticket → liệt kê chỗ mơ hồ (B1–B21) → viết lại `config.js` (số chuẩn + bản đồ dạng dữ liệu) và `world.js` theo đúng 12 bước của ticket → chạy 3 Đêm đầy đủ đo thời gian → viết 24 scenario mới + sửa 13 kỳ vọng cũ (có bảng lý do) → mutation check → UI → ảnh chụp → tài liệu.
+
+**AI sai / suýt sai và cách phát hiện:**
+- 46/46 scenario đạt ngay lần đầu → nghi test yếu. Mutation check: **2/13 lỗi cài cố ý không bị bắt** (Bóng Mực `spawning` vẫn đi, Bóng Mực đang bị đẩy khỏi vùng đèn vẫn đuổi). Đã thêm kiểm tra tính tay (vị trí đứng yên 60 tick; công thức đẩy d + (6.001−d)/30). Bài học ghi vào AGENTS.md + skill: mỗi luật mới phải có mutation.
+- Ảnh chụp đầu tiên của UI mới: mọi menu chồng lên nhau + cảnh đen. Nguyên nhân: `.screen { display:flex }` đè thuộc tính `hidden`. Sửa bằng `[hidden]{display:none!important}` và thêm quy tắc vào AGENTS.md. Không có test tự động nào bắt được lỗi này — chỉ nhìn ảnh mới thấy.
+- Script chụp ảnh bằng bash ghi sai tên file (`screenshots$1.png`) do cách bash xử lý `\$1` → chuyển sang `scripts/screenshot.mjs` (Node), dùng profile Edge tạm riêng (Edge đang mở của người dùng làm lệnh chụp không ghi file).
+- Một mutation (dốc ở Đêm 3) áp vào nhầm file nên kết quả "fail 0" là giả; chạy lại đúng file thì bị bắt. Đã ghi rõ trong mutation-check.md thay vì xóa dòng.
+
+**Harness thay đổi:** AGENTS.md (v1.1, thứ tự 12 bước, quy tắc mutation, quy tắc `hidden`, lệnh screenshot/build:web), skill `verify-game` (bước mutation, FPS phải đo máy thật), `scripts/screenshot.mjs`.
+
+**Token / chi phí (ước tính):** ~250–300k token vào, ~70k token ra (ticket dài + viết lại sim/UI). Tiết kiệm: không đọc lại file lớn sau khi sửa; patch nhỏ bằng script thay vì viết lại file; scenario dạng dữ liệu dùng chung cho test + bằng chứng; chỉ xem ảnh chụp khi cần xác nhận UI.
