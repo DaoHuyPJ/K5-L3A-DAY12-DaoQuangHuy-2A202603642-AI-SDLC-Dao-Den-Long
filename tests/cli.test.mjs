@@ -44,9 +44,9 @@ test('performance: a full night (21600 ticks, snapshot every tick) finishes well
   }
 });
 
-test('shade states only use the v1.1 names', () => {
+test('shade states only use the v1.2 names (v1.1 + drain)', () => {
   const r = runScenario({ seed: 11, night: 3, ticks: 6000, snapshotEvery: 30, inputs: PLAY_INPUTS });
-  const allowed = new Set(['spawning', 'wander', 'chase', 'recoil', 'stunned']);
+  const allowed = new Set(['spawning', 'wander', 'chase', 'recoil', 'stunned', 'drain']);
   for (const s of r.lines.filter((l) => l.type === 'snapshot')) for (const sh of s.shades) assert.ok(allowed.has(sh.state), sh.state);
 });
 
@@ -64,9 +64,10 @@ test('snapshot cadence: tick 0 then every N; end is last; events precede the sna
   const s = r.lines[0];
   for (const k of ['type', 'tick', 'sim_tick', 'night', 'state', 'time_left_s', 'score', 'wind', 'player', 'lanterns', 'shades', 'motes_active', 'motes', 'drifters', 'charms'])
     assert.ok(k in s, `snapshot missing ${k}`);
-  for (const k of ['pos', 'vel', 'grounded', 'flames', 'carried', 'invuln', 'dash_cd_s', 'pulse_cd_s', 'charm_s'])
+  for (const k of ['pos', 'vel', 'grounded', 'flames', 'carried', 'invuln', 'dash_cd_s', 'pulse_cd_s', 'charm_s', 'capacity'])
     assert.ok(k in s.player, `player missing ${k}`);
   assert.deepEqual(Object.keys(s.wind), ['active', 'dir_deg']);
+  for (const k of ['fuel', 'ever_lit', 'relit_count']) assert.ok(k in s.lanterns[0], `lantern missing ${k}`);
   assert.equal(s.sim_tick, s.tick);
 });
 
@@ -93,6 +94,7 @@ const badCases = {
   'scenario unknown lantern': ['scenario', JSON.stringify({ lanterns: [{ id: 'L9', lit: true }] })],
   'scenario invalid JSON': ['scenario', 'nope'],
   'scenario bad shade state': ['scenario', JSON.stringify({ shades: [{ pos: [1, 0, 1], state: 'angry' }] })],
+  'scenario fuel out of range': ['scenario', JSON.stringify({ lanterns: [{ id: 'L1', lit: true, fuel: 150 }] })],
   'dash not boolean': ['inputs', JSON.stringify({ frames: [{ tick: 0, dash: 'yes' }] })],
 };
 for (const [name, [kind, text]] of Object.entries(badCases)) {
