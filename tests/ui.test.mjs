@@ -37,6 +37,10 @@ test('Ticket-03 colour-blind mode: unlit lanterns are squashed 20% and torn; lit
   assert.deepEqual([offNormal.squash, offNormal.torn], [1, false]);
   const on = lanternLook({ id: 'L1', lit: true, fuel: 80 }, { cost: 10, colorBlind: true });
   assert.deepEqual([on.squash, on.torn], [1, false]);
+  // shape icons so lit/unlit is readable without colour
+  assert.equal(off.label, '✖ L1 · 0/10');
+  assert.equal(on.label, '☀ L1 · 80');
+  assert.equal(offNormal.label, 'L1 · 0/10');
 });
 
 test('palette equals the Ticket-02 colour table + Ticket-03 colour-blind colours (typed by hand)', async () => {

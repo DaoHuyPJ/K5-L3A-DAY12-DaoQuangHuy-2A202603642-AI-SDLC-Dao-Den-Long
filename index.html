@@ -32,6 +32,7 @@
     #h-prompt { bottom: 60px; left: 50%; transform: translateX(-50%); background: var(--panel); padding: 6px 14px; border-radius: 8px; border: 1px solid var(--lit); }
     #h-arrow { width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-bottom: 30px solid var(--lit);
                filter: drop-shadow(0 0 6px var(--lit)); }
+    #h-cb { top: 92px; right: 14px; font-size: 13px; background: var(--panel); padding: 3px 8px; border-radius: 6px; border: 1px solid #FFFFFF; }
     #h-wind { top: 52px; left: 50%; transform: translateX(-50%); color: #8FA3B8; font-weight: 700; }
     #toast { position: fixed; top: 84px; left: 50%; transform: translateX(-50%); font-size: 20px; color: var(--lit);
              text-shadow: 0 0 10px #ff9a2e; transition: opacity .4s; opacity: 0; pointer-events: none; text-align: center; }
@@ -59,6 +60,7 @@
   <div class="hud" id="h-prompt" hidden></div>
   <div class="hud" id="h-arrow" hidden></div>
   <div class="hud" id="h-charm" hidden></div>
+  <div class="hud" id="h-cb" hidden>👁 Bảng màu dễ phân biệt</div>
   <div class="hud" id="h-bar"></div>
   <div class="hud" id="h-cds">
     <div class="cd" id="cd-dash"><div class="fill"></div><span>Shift<br />Lướt</span></div>
@@ -72,7 +74,8 @@
       <h1>Đảo Đèn Lồng</h1>
       <p>Sương đen đã nuốt ánh sáng của ba hòn đảo.<br />Mây, người giữ đèn nhỏ tuổi, phải thắp lại các Đèn Lồng Lớn trước bình minh.</p>
       <button id="b-start">Bắt đầu</button>
-      <button class="ghost" id="b-settings-menu">Cài đặt</button>
+      <button class="ghost" id="b-settings-menu">Cài đặt</button><br />
+      <button class="ghost b-cb" id="b-cb-menu">Bảng màu dễ phân biệt: TẮT</button>
       <p class="hint">Giữ đủ đèn sáng tới bình minh — đèn cạn dầu sẽ tắt, châm đom đóm vào đèn đang sáng.<br />WASD đi · Chuột xoay camera (bấm vào màn hình để khóa chuột) · Space nhảy · Shift lướt · E nạp đèn · F tỏa sáng · Esc/P tạm dừng</p>
     </div>
   </div>
@@ -91,6 +94,7 @@
       <button id="b-resume">Tiếp tục</button><br />
       <button class="ghost" id="b-restart">Chơi lại Đêm</button>
       <button class="ghost" id="b-settings-pause">Cài đặt</button>
+      <button class="ghost b-cb" id="b-cb-pause">Bảng màu dễ phân biệt: TẮT</button>
       <button class="ghost" id="b-menu">Về menu</button>
     </div>
   </div>

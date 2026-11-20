@@ -172,9 +172,15 @@ function buildWorld(night) {
     const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTex, depthTest: false, transparent: true, sizeAttenuation: false }));
     label.scale.set(0.16, 0.04, 1); // constant on-screen size
     label.position.y = 4.8;
-    const tear = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.05), mat(0x15182a)); // torn paper (colour-blind mode)
-    tear.position.set(0.18, 3.25, 0.52);
-    tear.rotation.z = 0.6;
+    // torn paper (colour-blind mode): two dark crossing rips on the front and back of the paper
+    const tear = new THREE.Group();
+    const ripMat = new THREE.MeshBasicMaterial({ color: 0x05060c });
+    for (const [rz, z] of [[0.7, 0.57], [-0.7, 0.57], [0.7, -0.57], [-0.7, -0.57]]) {
+      const rip = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 0.04), ripMat);
+      rip.position.set(0, 3.3, z);
+      rip.rotation.z = rz;
+      tear.add(rip);
+    }
     tear.visible = false;
     group.add(pole, paper, core, cap, ring, light, label, tear);
     group.position.set(pos[0], pos[1], pos[2]);
@@ -433,12 +439,17 @@ $('s-volume').oninput = (e) => {
   sfx.setVolume(settings.volume);
   saveSettings();
 };
-$('s-cb').onchange = (e) => {
-  settings.colorBlind = e.target.checked;
-  document.body.classList.toggle('cb', settings.colorBlind);
+function setColorBlind(on) {
+  settings.colorBlind = on;
+  document.body.classList.toggle('cb', on);
+  $('s-cb').checked = on;
+  for (const b of document.querySelectorAll('.b-cb')) b.textContent = `Bảng màu dễ phân biệt: ${on ? 'BẬT' : 'TẮT'}`;
+  $('h-cb').hidden = !on;
   saveSettings();
-};
-document.body.classList.toggle('cb', settings.colorBlind);
+}
+$('s-cb').onchange = (e) => setColorBlind(e.target.checked);
+for (const b of document.querySelectorAll('.b-cb')) b.onclick = () => setColorBlind(!settings.colorBlind);
+setColorBlind(settings.colorBlind);
 $('s-sens').oninput = (e) => {
   settings.sens = Number(e.target.value);
   saveSettings();
@@ -774,9 +785,12 @@ if (params.has('autostart') || params.has('bench')) {
   });
   game.player.carried = Number(params.get('carried') || 0);
   if (params.has('fuel')) game.lanterns.filter((l) => l.lit).forEach((l) => (l.fuelT = Number(params.get('fuel')) * TICK_RATE));
-  if (params.has('cb')) {
-    settings.colorBlind = true;
-    document.body.classList.add('cb');
+  if (params.has('cb')) setColorBlind(true);
+  if (params.has('near')) {
+    // stand 5 m in front of lantern N, facing it (screenshots of lantern looks)
+    const l = game.lanterns[Number(params.get('near')) - 1];
+    game.player.pos = [l.pos[0], l.pos[1], l.pos[2] - 5];
+    camYaw = 0;
   }
   game.lanterns.filter((l) => !l.lit).forEach((l) => (l.deposited = Number(params.get('dep') || 0)));
   if (params.has('yaw')) camYaw = Number(params.get('yaw'));
