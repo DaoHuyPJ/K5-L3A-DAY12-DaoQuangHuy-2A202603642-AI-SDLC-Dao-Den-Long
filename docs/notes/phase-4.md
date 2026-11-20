@@ -50,7 +50,7 @@
 | §6 Contract v1.3 | `bench_cmd`, `soak_cmd`, `contract_version: "1.3"` | `tests/phase4.test.mjs`, `tests/unit.test.mjs` |
 | §7 Retro + video | 1–2 trang; video < 5 phút | [retro.md](retro.md); kịch bản [docs/demo/script.md](../demo/script.md) (người làm bài quay) |
 
-## 4. Test cũ bị đổi
+## 4. Test cũ bị Ticket-04 làm sai
 
 | Test | Trước | Sau | Lý do |
 |---|---|---|---|
