@@ -1,0 +1,7 @@
+# Credits
+
+- **three.js** 0.160.0 — MIT License, https://threejs.org (npm dependency, not vendored).
+- All 3D models are built from three.js primitive shapes in code; no external art assets.
+- All sounds are synthesized at runtime with the WebAudio API (`src/game/sfx.js`); no audio files.
+- Characters, setting and names (Mây, Bóng Mực, Đảo Đèn Lồng) belong to the Day 12 AI SDLC lab brief.
+- Code, tests and docs were written with the help of **Claude Code** (Anthropic, model Claude Opus 5.5) and reviewed by the author; see `docs/notes/ai-log.md`.

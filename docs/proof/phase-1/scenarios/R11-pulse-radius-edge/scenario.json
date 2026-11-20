@@ -1,0 +1,31 @@
+{
+  "random_motes": false,
+  "random_shades": false,
+  "motes": [],
+  "shades": [
+    {
+      "id": "S1",
+      "pos": [
+        6.05,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "S2",
+      "pos": [
+        0,
+        0,
+        -6
+      ]
+    }
+  ],
+  "player": {
+    "pos": [
+      0,
+      0,
+      0
+    ],
+    "carried": 2
+  }
+}
