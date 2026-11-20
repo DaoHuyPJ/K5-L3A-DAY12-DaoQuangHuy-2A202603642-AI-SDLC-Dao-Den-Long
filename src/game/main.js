@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { NIGHTS, RULES, TICK_RATE, TUNING } from '../sim/config.js';
 import { createGame, makeRng, step } from '../sim/world.js';
 import { Sfx } from './sfx.js';
+import { lanternLook } from './lanternLook.js';
 
 const $ = (id) => document.getElementById(id);
 const DT = 1 / TICK_RATE;
@@ -168,10 +169,19 @@ function buildWorld(night) {
     ring.position.y = 0.04;
     const light = new THREE.PointLight(C.lit, 0, 24, 1.4);
     light.position.y = 3.3;
-    group.add(pole, paper, core, cap, ring, light);
+    // progress label above unlit lanterns ("L1 · 6/10")
+    const labelCanvas = document.createElement('canvas');
+    labelCanvas.width = 256;
+    labelCanvas.height = 64;
+    const labelTex = new THREE.CanvasTexture(labelCanvas);
+    labelTex.colorSpace = THREE.SRGBColorSpace;
+    const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTex, depthTest: false, transparent: true, sizeAttenuation: false }));
+    label.scale.set(0.16, 0.04, 1); // constant on-screen size
+    label.position.y = 4.8;
+    group.add(pole, paper, core, cap, ring, light, label);
     group.position.set(pos[0], pos[1], pos[2]);
     world.add(group);
-    lanternViews.set(`L${i + 1}`, { group, paperMat, coreMat, ring, light, glow: 0 });
+    lanternViews.set(`L${i + 1}`, { group, paperMat, coreMat, ring, light, glow: 0, label, labelCanvas, labelTex, labelText: '' });
   });
 }
 
@@ -468,7 +478,14 @@ function toast(msg) {
 function onEvent(e) {
   switch (e.name) {
     case 'mote_picked': sfx.pick(e.data.carried); break;
-    case 'deposit': sfx.deposit(); toast(`Nạp ${e.data.amount} đom đóm vào ${e.data.lantern_id} (${e.data.deposited}/${TUNING.lantern_cost})`); break;
+    case 'deposit': {
+      sfx.deposit();
+      const need = TUNING.lantern_cost - e.data.deposited;
+      toast(need > 0
+        ? `Nạp ${e.data.amount} vào ${e.data.lantern_id}: ${e.data.deposited}/${TUNING.lantern_cost} — còn thiếu ${need} đom đóm để thắp`
+        : `Nạp ${e.data.amount} vào ${e.data.lantern_id}: đủ ${TUNING.lantern_cost}/${TUNING.lantern_cost}`);
+      break;
+    }
     case 'lantern_lit': sfx.lit(); toast(`Đèn ${e.data.lantern_id} đã sáng!`); break;
     case 'pulse': sfx.pulse(); pulseT = 0; break;
     case 'dash': sfx.dash(); break;
@@ -536,13 +553,28 @@ function draw(t, dt) {
   for (const l of game.lanterns) {
     const v = lanternViews.get(l.id);
     if (l.lit) lit++;
-    const target = l.lit ? 1 : (l.deposited / TUNING.lantern_cost) * 0.3;
-    v.glow += (target - v.glow) * Math.min(1, dt * 3);
+    const look = lanternLook(l, TUNING.lantern_cost);
+    v.glow += (look.glow - v.glow) * Math.min(1, dt * 3);
+    if (!l.lit) v.glow = 0; // never glow before it is really lit
     v.paperMat.color.setHex(l.lit ? C.lit : C.off);
     v.paperMat.emissiveIntensity = v.glow * 2;
-    v.coreMat.opacity = l.lit ? 0.9 : v.glow;
-    v.light.intensity = v.glow * 40;
-    v.ring.material.opacity = l.lit ? 0.35 + Math.sin(t * 2) * 0.1 : 0;
+    v.coreMat.opacity = v.glow * 0.9;
+    v.light.intensity = look.light ? v.glow * 40 : 0;
+    v.ring.material.opacity = look.ring ? 0.35 + Math.sin(t * 2) * 0.1 : 0;
+    v.label.visible = !!look.label;
+    if (look.label && look.label !== v.labelText) {
+      v.labelText = look.label;
+      const c = v.labelCanvas.getContext('2d');
+      c.clearRect(0, 0, 256, 64);
+      c.fillStyle = 'rgba(14, 20, 48, 0.75)';
+      c.fillRect(0, 8, 256, 48);
+      c.fillStyle = l.deposited > 0 ? '#FFB347' : '#F5F1E6';
+      c.font = 'bold 30px system-ui, sans-serif';
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.fillText(look.label, 128, 33);
+      v.labelTex.needsUpdate = true;
+    }
   }
   ambient.intensity = 0.15 + 0.55 * (lit / game.lanterns.length);
 
@@ -688,6 +720,7 @@ if (params.has('autostart') || params.has('bench')) {
     l.deposited = TUNING.lantern_cost;
   });
   game.player.carried = Number(params.get('carried') || 0);
+  game.lanterns.filter((l) => !l.lit).forEach((l) => (l.deposited = Number(params.get('dep') || 0)));
   if (params.has('yaw')) camYaw = Number(params.get('yaw'));
   if (params.has('bench')) {
     // scripted circle run for the FPS measurement (keys only, sim rules unchanged)
