@@ -1,0 +1,588 @@
+{
+  "measured_at": "2026-11-20T08:47:56.088Z",
+  "url": "/?bench (scripted run, sim running, camera turning)",
+  "viewport": "1280x720",
+  "seconds": 20,
+  "avg_fps": 72.1,
+  "min_1s_fps": 1,
+  "per_second": [
+    102,
+    96,
+    100,
+    98,
+    100,
+    100,
+    100,
+    100,
+    95,
+    99,
+    106,
+    80,
+    35,
+    45,
+    35,
+    46,
+    67,
+    50,
+    5,
+    1
+  ],
+  "page_counter": "32 FPS · trung bình 79 (20s) · 1280×720",
+  "sim_ticks": [
+    162,
+    223,
+    284,
+    344,
+    405,
+    466,
+    526,
+    588,
+    648,
+    709,
+    770,
+    831,
+    887,
+    948,
+    1009,
+    1070,
+    1131,
+    1191,
+    1200,
+    1215
+  ],
+  "probes": [
+    {
+      "mode": "playing",
+      "tick": 162,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 49,
+      "tris": 5334,
+      "programs": 6,
+      "geos": 68,
+      "tex": 3,
+      "objects": 178,
+      "ms": {
+        "step": 0,
+        "draw": 0.4,
+        "render": 1.4
+      },
+      "shades": 0,
+      "motes": 20,
+      "pos": [
+        11,
+        0,
+        2
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 223,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 57,
+      "tris": 6021,
+      "programs": 6,
+      "geos": 84,
+      "tex": 4,
+      "objects": 175,
+      "ms": {
+        "step": 0,
+        "draw": 0.3,
+        "render": 0.9
+      },
+      "shades": 0,
+      "motes": 19,
+      "pos": [
+        10,
+        0,
+        -4
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 284,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 66,
+      "tris": 6851,
+      "programs": 6,
+      "geos": 90,
+      "tex": 5,
+      "objects": 178,
+      "ms": {
+        "step": 0,
+        "draw": 0.3,
+        "render": 0.8
+      },
+      "shades": 0,
+      "motes": 20,
+      "pos": [
+        5,
+        0,
+        -5
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 344,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 71,
+      "tris": 7826,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 188,
+      "ms": {
+        "step": 0,
+        "draw": 0.5,
+        "render": 1.3
+      },
+      "shades": 2,
+      "motes": 20,
+      "pos": [
+        0,
+        0,
+        -2
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 405,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 67,
+      "tris": 7493,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 188,
+      "ms": {
+        "step": 0.2,
+        "draw": 0.5,
+        "render": 1.9
+      },
+      "shades": 2,
+      "motes": 20,
+      "pos": [
+        2,
+        0,
+        4
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 466,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 57,
+      "tris": 6716,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 188,
+      "ms": {
+        "step": 0,
+        "draw": 0.3,
+        "render": 1.9
+      },
+      "shades": 2,
+      "motes": 20,
+      "pos": [
+        7,
+        0,
+        6
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 526,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 54,
+      "tris": 6606,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 191,
+      "ms": {
+        "step": 0,
+        "draw": 0.4,
+        "render": 1.4
+      },
+      "shades": 2,
+      "motes": 21,
+      "pos": [
+        11,
+        0,
+        2
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 588,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 60,
+      "tris": 6369,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 191,
+      "ms": {
+        "step": 0.2,
+        "draw": 0.3,
+        "render": 1.2
+      },
+      "shades": 2,
+      "motes": 21,
+      "pos": [
+        10,
+        0,
+        -4
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 648,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 73,
+      "tris": 7604,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 191,
+      "ms": {
+        "step": 0,
+        "draw": 0.1,
+        "render": 0.9
+      },
+      "shades": 2,
+      "motes": 21,
+      "pos": [
+        4,
+        0,
+        -5
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 709,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 75,
+      "tris": 8302,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 191,
+      "ms": {
+        "step": 0,
+        "draw": 0.3,
+        "render": 1.5
+      },
+      "shades": 2,
+      "motes": 21,
+      "pos": [
+        0,
+        0,
+        -1
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 770,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 69,
+      "tris": 7784,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 194,
+      "ms": {
+        "step": 0.1,
+        "draw": 0.4,
+        "render": 1.7
+      },
+      "shades": 2,
+      "motes": 22,
+      "pos": [
+        2,
+        0,
+        4
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 831,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 65,
+      "tris": 7486,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 199,
+      "ms": {
+        "step": 0.1,
+        "draw": 0.3,
+        "render": 1.5
+      },
+      "shades": 3,
+      "motes": 22,
+      "pos": [
+        8,
+        0,
+        6
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 887,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 60,
+      "tris": 7064,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 199,
+      "ms": {
+        "step": 0.1,
+        "draw": 0.3,
+        "render": 2.1
+      },
+      "shades": 3,
+      "motes": 22,
+      "pos": [
+        11,
+        0,
+        1
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 948,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 66,
+      "tris": 7685,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 199,
+      "ms": {
+        "step": 0,
+        "draw": 0.1,
+        "render": 1.5
+      },
+      "shades": 3,
+      "motes": 22,
+      "pos": [
+        9,
+        0,
+        -4
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 1009,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 74,
+      "tris": 8352,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 202,
+      "ms": {
+        "step": 0.1,
+        "draw": 0.4,
+        "render": 1.5
+      },
+      "shades": 3,
+      "motes": 23,
+      "pos": [
+        3,
+        0,
+        -5
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 1070,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 78,
+      "tris": 8543,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 202,
+      "ms": {
+        "step": 0.2,
+        "draw": 0.5,
+        "render": 1.2
+      },
+      "shades": 3,
+      "motes": 23,
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 1131,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 70,
+      "tris": 7805,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 202,
+      "ms": {
+        "step": 0.1,
+        "draw": 0.3,
+        "render": 1.6
+      },
+      "shades": 3,
+      "motes": 23,
+      "pos": [
+        2,
+        0,
+        5
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 1191,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 64,
+      "tris": 7287,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 202,
+      "ms": {
+        "step": 0,
+        "draw": 0.2,
+        "render": 1.5
+      },
+      "shades": 3,
+      "motes": 23,
+      "pos": [
+        8,
+        0,
+        5
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 1200,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 65,
+      "tris": 7486,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 205,
+      "ms": {
+        "step": 0.1,
+        "draw": 0.1,
+        "render": 1.8
+      },
+      "shades": 3,
+      "motes": 24,
+      "pos": [
+        8,
+        0,
+        5
+      ],
+      "filter": ""
+    },
+    {
+      "mode": "playing",
+      "tick": 1215,
+      "state": "playing",
+      "visible": "visible",
+      "flames": 3,
+      "calls": 72,
+      "tris": 7476,
+      "programs": 6,
+      "geos": 92,
+      "tex": 5,
+      "objects": 205,
+      "ms": {
+        "step": 0.1,
+        "draw": 0.3,
+        "render": 1.9
+      },
+      "shades": 3,
+      "motes": 24,
+      "pos": [
+        8,
+        0,
+        4
+      ],
+      "filter": ""
+    }
+  ],
+  "threshold": 30,
+  "hidden_seconds": 0,
+  "valid": true,
+  "pass": true,
+  "browser": "msedge.exe",
+  "webgl_renderer": "ANGLE (Intel, Intel(R) UHD Graphics (0x00009BC4) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "machine": {
+    "platform": "win32 10.0.26100",
+    "cpu": "Intel(R) Core(TM) i7-10870H CPU @ 2.20GHz",
+    "cores": 16,
+    "ram_gb": 16
+  },
+  "note": "headless browser; if webgl_renderer mentions SwiftShader the GPU was not used (software rendering, pessimistic)"
+}

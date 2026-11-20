@@ -7,6 +7,8 @@
 - Test: `npm test` (node:test) · Proof: `npm run verify -- phase-N` (skill `verify-game`)
 - Headless: `node src/headless.js --seed 1 --night 1|2|3 --ticks 600 --out out.jsonl [--scenario f] [--inputs f] [--snapshot-every N]`
 - Screenshot (server running): `node scripts/screenshot.mjs <dir> <name> "autostart&night=2&lit=1"` — then LOOK at the png
+- FPS proof (real time, GPU): `FPS_UNCAPPED=1 node scripts/measure-fps.mjs phase-N 30` → `docs/proof/phase-N/fps.json` (invalid if the page was ever hidden)
+- Lab requirement checklist: `docs/proof/compliance.md` — update before every tag
 - Web build for claude.ai artifact / static hosting: `npm run build:web` → `dist/web/`
 
 ## Layout
@@ -24,4 +26,5 @@
 - Don't invent requirements; quote the ticket. Ambiguity → numbered assumption in `docs/notes/phase-N.md`.
 - CSS: any element toggled with `hidden` must not get a `display` rule that overrides it (global `[hidden]{display:none!important}` exists).
 - Visuals must not suggest a state the sim does not have (e.g. only `lit` lanterns may glow). Put such rules in pure helpers under `src/game/` and unit-test them (`tests/ui.test.mjs`).
+- A measurement only counts if its conditions are valid (page visible, GPU named, duration stated); never average over stalls you have not explained.
 - Small commits, one concern each. Tag `phase-N` only after `npm run verify -- phase-N` passes.

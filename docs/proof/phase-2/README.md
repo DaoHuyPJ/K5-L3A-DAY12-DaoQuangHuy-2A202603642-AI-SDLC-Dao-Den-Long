@@ -37,6 +37,7 @@ Giả định + tiêu chí nghiệm thu: [docs/notes/phase-2.md](../../notes/pha
 | HUD đầy đủ + mũi tên + nhắc "E — Nạp ánh sáng" | [night1.png](screenshots/night1.png), [night2.png](screenshots/night2.png), [night3.png](screenshots/night3.png) | Đạt (kiểm bằng mắt; chưa có ảnh nhắc E và đồng hồ đỏ) |
 | Đèn tắt/sáng phân biệt rõ; đèn nạp dở không phát sáng, có nhãn x/10 (lỗi người dùng báo) | `tests/ui.test.mjs` + [lantern-progress.png](screenshots/lantern-progress.png) | Đạt (đã sửa) |
 | Bảng màu chuẩn, ánh sáng 0.15 + 0.55 × tiến độ | Hằng `C` và `draw()` trong `src/game/main.js` | Đạt (đọc code) |
-| ≥ 30 FPS trung bình ở 1280×720 | `/?bench` trên máy thật | **Chưa đo** — headless Edge dùng thời gian ảo nên không đo được FPS |
+| ≥ 30 FPS trung bình ở 1280×720 | `scripts/measure-fps.mjs` — GPU thật, trang luôn hiển thị, 30 s: [fps.md](fps.md) | Đạt — 122.8 trung bình, thấp nhất 69 FPS |
+| Agent không được kết thúc khi test đỏ | Stop hook với lỗi cài cố ý: [hook-check.md](hook-check.md) | Đạt (exit 2 khi đỏ, 0 khi xanh) |
 | Test có khả năng bắt lỗi | [mutation-check.md](mutation-check.md): 18 lỗi cài cố ý, tất cả bị bắt (sau khi vá 2 lỗ hổng) | Đạt |
 | Hồi quy Phase 1 | R01–R22 chạy với số chuẩn; thay đổi kỳ vọng ghi ở phase-2.md §4 | Đạt |
