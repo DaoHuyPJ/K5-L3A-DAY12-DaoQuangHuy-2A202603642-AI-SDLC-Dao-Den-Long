@@ -17,9 +17,9 @@ description: Run the game headless against the acceptance scenarios, mutation-ch
    then LOOK at the image before claiming anything about it.
    FPS: `FPS_UNCAPPED=1 node scripts/measure-fps.mjs phase-N 30` (real time, GPU, checks the page stayed visible).
    Read `per_second` and `hidden_seconds`, not only the average.
-6. Walk `docs/proof/compliance.md` (lab RUBRIC/SUBMISSION/DoD) and update every row before tagging.
 5. Update the traceability table in `docs/proof/phase-N/README.md` (requirement -> check -> evidence -> result).
    Never hand-edit generated files; a requirement that is not met is written as "chưa đạt" with the reason.
+6. Walk `docs/proof/compliance.md` (lab RUBRIC/SUBMISSION/DoD) and update every row before tagging.
 
 Adding a scenario: append to `SCENARIOS` in `tests/scenarios.mjs` with `name`, `req`, `seed`, `night`, `ticks`,
 optional `scenario`/`inputs`/`snapshotEvery`, and a `check(lines)` using node:assert. Derive expected
