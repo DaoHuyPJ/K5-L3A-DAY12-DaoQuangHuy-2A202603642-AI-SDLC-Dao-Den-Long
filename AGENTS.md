@@ -19,6 +19,7 @@
 - `tests/scenarios.mjs` acceptance scenarios (R = Phase-1 reqs, P = Phase-2, Q = Phase-3; `[T03]` marks expectations changed by Ticket-03).
 
 ## Rules
+- Third-party skills in `.claude/skills/` (threejs-*, performance-optimization, game-ui-ux, game-feel; see `.claude/skills/_third_party/`) are advice: **these rules and the tickets win**. They target three r187 — this repo pins **three 0.160**; verify an API exists before using it. Juice/visual advice goes in `src/game/` only.
 - Standard numbers come from the ticket; never "tune" them. `game.contract.json` tuning must equal `TUNING` (tests enforce, incl. a hand-typed copy of the ticket values).
 - Browser-only features must NOT change headless output: keep them in `src/game/`.
 - Tick model: snapshot 0 before input; step k reads input k, events get tick k+1; paused ticks advance `tick` but not `sim_tick`.
