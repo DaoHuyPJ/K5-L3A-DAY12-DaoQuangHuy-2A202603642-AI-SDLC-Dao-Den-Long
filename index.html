@@ -14,6 +14,8 @@
     #h-flames { top: 12px; left: 14px; font-size: 26px; letter-spacing: 4px; }
     #h-time { top: 10px; left: 50%; transform: translateX(-50%); font-size: 28px; font-variant-numeric: tabular-nums; font-weight: 700; }
     #h-time.danger { color: var(--danger); animation: blink 1s steps(2) infinite; }
+    body.cb #h-time.danger { color: #FFFFFF; } /* Ticket-03 colour-blind: warning #FF5A5F -> #FFFFFF + ⚠ */
+    #h-bar b { margin-left: 8px; font-size: 16px; align-self: center; font-variant-numeric: tabular-nums; }
     @keyframes blink { 50% { opacity: .35; } }
     #h-right { top: 12px; right: 14px; text-align: right; line-height: 1.4; }
     #h-score { color: var(--gold); font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -71,7 +73,7 @@
       <p>Sương đen đã nuốt ánh sáng của ba hòn đảo.<br />Mây, người giữ đèn nhỏ tuổi, phải thắp lại các Đèn Lồng Lớn trước bình minh.</p>
       <button id="b-start">Bắt đầu</button>
       <button class="ghost" id="b-settings-menu">Cài đặt</button>
-      <p class="hint">WASD đi · Chuột xoay camera (bấm vào màn hình để khóa chuột) · Space nhảy · Shift lướt · E nạp đèn · F tỏa sáng · Esc/P tạm dừng</p>
+      <p class="hint">Giữ đủ đèn sáng tới bình minh — đèn cạn dầu sẽ tắt, châm đom đóm vào đèn đang sáng.<br />WASD đi · Chuột xoay camera (bấm vào màn hình để khóa chuột) · Space nhảy · Shift lướt · E nạp đèn · F tỏa sáng · Esc/P tạm dừng</p>
     </div>
   </div>
   <div class="screen" id="scr-intro" hidden>
@@ -96,6 +98,7 @@
     <div class="panel">
       <h1>Cài đặt</h1>
       <label for="s-volume">Âm lượng <input type="range" id="s-volume" min="0" max="1" step="0.05" /></label>
+      <label for="s-cb">Bảng màu dễ phân biệt <input type="checkbox" id="s-cb" /></label>
       <label for="s-sens">Độ nhạy chuột <input type="range" id="s-sens" min="0.05" max="0.8" step="0.01" /></label>
       <button id="b-settings-back">Xong</button>
     </div>

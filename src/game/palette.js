@@ -8,4 +8,6 @@ export const C = Object.freeze({
   shirt: 0xe8e2d0, scarf: 0xc8102e, // scarf colour is also the Wind Charm colour
   gold: 0xf2c14e, drifter: 0x8fa3b8,
   danger: 0xff5a5f, uiText: 0xf5f1e6,
+  // Ticket-03 colour-blind palette (setting "Bảng màu dễ phân biệt")
+  cbShadeRim: 0x00b3ff, cbDanger: 0xffffff,
 });
