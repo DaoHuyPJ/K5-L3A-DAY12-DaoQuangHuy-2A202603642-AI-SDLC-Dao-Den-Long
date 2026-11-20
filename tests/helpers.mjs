@@ -10,7 +10,7 @@ export const HEADLESS = path.join(ROOT, 'src', 'headless.js');
 /** Write scenario/inputs to `dir`, run the real headless CLI, return {code, stderr, lines, outText}. */
 export function runScenario(sc, dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ddl-'))) {
   fs.mkdirSync(dir, { recursive: true });
-  const args = ['--seed', String(sc.seed ?? 1), '--night', '1', '--ticks', String(sc.ticks)];
+  const args = ['--seed', String(sc.seed ?? 1), '--night', String(sc.night ?? 1), '--ticks', String(sc.ticks)];
   if (sc.scenario) {
     fs.writeFileSync(path.join(dir, 'scenario.json'), JSON.stringify(sc.scenario, null, 2) + '\n');
     args.push('--scenario', path.join(dir, 'scenario.json'));

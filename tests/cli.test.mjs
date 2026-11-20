@@ -26,6 +26,30 @@ test('determinism: same seed + inputs -> byte-identical output (default random w
   assert.equal(a.outText, b.outText);
 });
 
+for (const night of [2, 3]) {
+  test(`determinism night ${night}: same seed + inputs -> identical output`, () => {
+    const a = runScenario({ seed: 9, night, ticks: 3000, inputs: PLAY_INPUTS });
+    const b = runScenario({ seed: 9, night, ticks: 3000, inputs: PLAY_INPUTS });
+    assert.equal(a.code, 0, a.stderr);
+    assert.equal(a.outText, b.outText);
+  });
+}
+
+test('performance: a full night (21600 ticks, snapshot every tick) finishes well under 30 s', () => {
+  for (const night of [1, 2, 3]) {
+    const t0 = Date.now();
+    const r = runScenario({ seed: 2, night, ticks: 21600, snapshotEvery: 1 });
+    assert.equal(r.code, 0, r.stderr);
+    assert.ok(Date.now() - t0 < 30000, `night ${night} took ${Date.now() - t0} ms`);
+  }
+});
+
+test('shade states only use the v1.1 names', () => {
+  const r = runScenario({ seed: 11, night: 3, ticks: 6000, snapshotEvery: 30, inputs: PLAY_INPUTS });
+  const allowed = new Set(['spawning', 'wander', 'chase', 'recoil', 'stunned']);
+  for (const s of r.lines.filter((l) => l.type === 'snapshot')) for (const sh of s.shades) assert.ok(allowed.has(sh.state), sh.state);
+});
+
 test('different seeds give different random worlds', () => {
   const a = runScenario({ seed: 1, ticks: 0 });
   const b = runScenario({ seed: 2, ticks: 0 });
@@ -38,8 +62,11 @@ test('snapshot cadence: tick 0 then every N; end is last; events precede the sna
   assert.deepEqual(snaps, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]);
   assert.deepEqual(r.lines.at(-1), { type: 'end', ticks: 95, state: 'playing', score: 0 });
   const s = r.lines[0];
-  for (const k of ['type', 'tick', 'sim_tick', 'state', 'time_left_s', 'score', 'player', 'lanterns', 'shades', 'motes_active'])
+  for (const k of ['type', 'tick', 'sim_tick', 'night', 'state', 'time_left_s', 'score', 'wind', 'player', 'lanterns', 'shades', 'motes_active', 'motes', 'drifters', 'charms'])
     assert.ok(k in s, `snapshot missing ${k}`);
+  for (const k of ['pos', 'vel', 'grounded', 'flames', 'carried', 'invuln', 'dash_cd_s', 'pulse_cd_s', 'charm_s'])
+    assert.ok(k in s.player, `player missing ${k}`);
+  assert.deepEqual(Object.keys(s.wind), ['active', 'dir_deg']);
   assert.equal(s.sim_tick, s.tick);
 });
 
@@ -65,6 +92,8 @@ const badCases = {
   'scenario bad pos': ['scenario', JSON.stringify({ player: { pos: [0, 0] } })],
   'scenario unknown lantern': ['scenario', JSON.stringify({ lanterns: [{ id: 'L9', lit: true }] })],
   'scenario invalid JSON': ['scenario', 'nope'],
+  'scenario bad shade state': ['scenario', JSON.stringify({ shades: [{ pos: [1, 0, 1], state: 'angry' }] })],
+  'dash not boolean': ['inputs', JSON.stringify({ frames: [{ tick: 0, dash: 'yes' }] })],
 };
 for (const [name, [kind, text]] of Object.entries(badCases)) {
   test(`malformed ${kind} file (${name}) -> exit 2 + stderr`, () => {
@@ -82,7 +111,7 @@ test('bad CLI usage -> non-zero exit + stderr', () => {
   for (const args of [
     ['--night', '1', '--ticks', '10', '--out', out], // no seed
     ['--seed', '1', '--night', '1', '--out', out], // no ticks
-    ['--seed', '1', '--night', '2', '--ticks', '1', '--out', out], // unknown night
+    ['--seed', '1', '--night', '4', '--ticks', '1', '--out', out], // unknown night
     ['--seed', 'x', '--night', '1', '--ticks', '1', '--out', out],
   ]) {
     const r = runHeadless(args);
