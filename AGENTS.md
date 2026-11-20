@@ -1,22 +1,26 @@
 # AGENTS.md — Đảo Đèn Lồng
 
-3D lantern game + headless mode graded by **Test Contract** (spec: lab board; notes in `docs/notes/`).
+3D lantern game, 3 nights, + headless mode graded by **Test Contract v1.1** (Ticket-02). Notes: `docs/notes/phase-N.md`.
 
 ## Commands
-- Install: `npm install` (only dep: three) · Play: `npm start` → http://localhost:8080
-- Test: `npm test` (node:test, no extra deps) · Proof: `npm run verify -- phase-N` (skill `verify-game`)
-- Headless: `node src/headless.js --seed 1 --night 1 --ticks 600 --out out.jsonl [--scenario f] [--inputs f] [--snapshot-every N]`
+- Install: `npm install` (only dep: three) · Play: `npm start` → http://localhost:8080 (`?fps` FPS counter, `?bench` FPS run)
+- Test: `npm test` (node:test) · Proof: `npm run verify -- phase-N` (skill `verify-game`)
+- Headless: `node src/headless.js --seed 1 --night 1|2|3 --ticks 600 --out out.jsonl [--scenario f] [--inputs f] [--snapshot-every N]`
+- Screenshot (server running): `node scripts/screenshot.mjs <dir> <name> "autostart&night=2&lit=1"` — then LOOK at the png
+- Web build for claude.ai artifact / static hosting: `npm run build:web` → `dist/web/`
 
 ## Layout
-- `src/sim/` pure deterministic logic (config, io validation, world step). **No DOM, Date, Math.random.**
-- `src/headless.js` CLI (exit 0 ok / 1 usage / 2 malformed file) · `src/game/` Three.js view only.
-- `tests/scenarios.mjs` acceptance scenarios (shared by tests + verify script).
+- `src/sim/config.js` ALL numbers: `TUNING` (= contract tuning), `RULES` (other Ticket-02 rules, in ticks), `NIGHTS` (maps: lanterns, spawn points, pads, `ground(x,z)`).
+- `src/sim/world.js` deterministic step in the **ticket's 12-step order** (pause → counters → move+fall → pickups → lanterns → safe zones → pulse → shades/drifters → contacts → spawns → win/lose). **No DOM, Date, Math.random.**
+- `src/headless.js` CLI (exit 0 ok / 1 usage / 2 malformed file) · `src/game/` Three.js view, menus, HUD, sound only.
+- `tests/scenarios.mjs` acceptance scenarios (R = Phase-1 reqs on standard numbers, P = Phase-2 features).
 
 ## Rules
-- Every gameplay number lives in `src/sim/config.js`; `game.contract.json` tuning must match (test enforces).
-- Browser-only features (visuals, sound, creative extras) must NOT change headless output: keep them in `src/game/`.
-- Follow the tick model exactly: snapshot 0 before input; step k reads input k, events get tick k+1.
-- Expected values in tests are derived by hand from the spec/tuning, never pasted from program output.
-- A requirement change that breaks an old test: update/remove the test **with a reason** in `docs/notes/phase-N.md`.
-- Don't invent requirements; quote the ticket. Ambiguity → write an assumption in `docs/notes/phase-N.md`.
-- Small commits, one concern each. Tag `phase-N` only after `npm run verify` passes.
+- Standard numbers come from the ticket; never "tune" them. `game.contract.json` tuning must equal `TUNING` (tests enforce, incl. a hand-typed copy of the ticket values).
+- Browser-only features must NOT change headless output: keep them in `src/game/`.
+- Tick model: snapshot 0 before input; step k reads input k, events get tick k+1; paused ticks advance `tick` but not `sim_tick`.
+- Expected values in tests are derived by hand from the ticket, never pasted from program output. After adding tests, run a mutation (break the rule on purpose) to prove the test can fail.
+- A requirement change that breaks an old test: update it **with a reason** in `docs/notes/phase-N.md` (table "test cũ bị làm sai"). Never delete or skip silently.
+- Don't invent requirements; quote the ticket. Ambiguity → numbered assumption in `docs/notes/phase-N.md`.
+- CSS: any element toggled with `hidden` must not get a `display` rule that overrides it (global `[hidden]{display:none!important}` exists).
+- Small commits, one concern each. Tag `phase-N` only after `npm run verify -- phase-N` passes.
