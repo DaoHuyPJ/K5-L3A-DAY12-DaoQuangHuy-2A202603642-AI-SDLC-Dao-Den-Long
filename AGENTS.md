@@ -1,6 +1,6 @@
 # AGENTS.md — Đảo Đèn Lồng
 
-3D lantern game, 3 nights, + headless mode graded by **Test Contract v1.1** (Ticket-02). Notes: `docs/notes/phase-N.md`.
+3D lantern game, 3 nights, + headless mode graded by **Test Contract v1.2** (Ticket-02 + Ticket-03 change request). Notes: `docs/notes/phase-N.md`, decisions: `docs/adr/`.
 
 ## Commands
 - Install: `npm install` (only dep: three) · Play: `npm start` → http://localhost:8080 (`?fps` FPS counter, `?bench` FPS run)
@@ -13,18 +13,20 @@
 
 ## Layout
 - `src/sim/config.js` ALL numbers: `TUNING` (= contract tuning), `RULES` (other Ticket-02 rules, in ticks), `NIGHTS` (maps: lanterns, spawn points, pads, `ground(x,z)`).
-- `src/sim/world.js` deterministic step in the **ticket's 12-step order** (pause → counters → move+fall → pickups → lanterns → safe zones → pulse → shades/drifters → contacts → spawns → win/lose). **No DOM, Date, Math.random.**
+- `src/sim/world.js` deterministic step in the **ticket's 12-step order** (pause → counters + lantern fuel/out → move+fall → pickups → lanterns → safe zones → pulse → shades/drifters → contacts → spawns → win/lose at dawn). **No DOM, Date, Math.random.**
+- Lantern fuel is an integer in 1/60 units (`fuelT`, full = 6000); safe zone = `zoneActive()` (lit and fuel ≥ 30), never plain `lit`.
 - `src/headless.js` CLI (exit 0 ok / 1 usage / 2 malformed file) · `src/game/` Three.js view, menus, HUD, sound only.
-- `tests/scenarios.mjs` acceptance scenarios (R = Phase-1 reqs on standard numbers, P = Phase-2 features).
+- `tests/scenarios.mjs` acceptance scenarios (R = Phase-1 reqs, P = Phase-2, Q = Phase-3; `[T03]` marks expectations changed by Ticket-03).
 
 ## Rules
 - Standard numbers come from the ticket; never "tune" them. `game.contract.json` tuning must equal `TUNING` (tests enforce, incl. a hand-typed copy of the ticket values).
 - Browser-only features must NOT change headless output: keep them in `src/game/`.
 - Tick model: snapshot 0 before input; step k reads input k, events get tick k+1; paused ticks advance `tick` but not `sim_tick`.
 - Expected values in tests are derived by hand from the ticket, never pasted from program output. After adding tests, run a mutation (break the rule on purpose) to prove the test can fail.
-- A requirement change that breaks an old test: update it **with a reason** in `docs/notes/phase-N.md` (table "test cũ bị làm sai"). Never delete or skip silently.
+- A requirement change that breaks an old test: update it **with a reason** in `docs/notes/phase-N.md` (table "test cũ bị làm sai"), mark it in the test, add a breaking-change line to CHANGELOG.md, and write/extend an ADR when a state model or win rule changes. Never delete or skip silently.
 - Don't invent requirements; quote the ticket. Ambiguity → numbered assumption in `docs/notes/phase-N.md`.
 - CSS: any element toggled with `hidden` must not get a `display` rule that overrides it (global `[hidden]{display:none!important}` exists).
+- Debug/screenshot helpers (`?autostart&lit=…`) must build states the sim accepts (e.g. lit ⇒ fuel). When the model changes, update them too.
 - Visuals must not suggest a state the sim does not have (e.g. only `lit` lanterns may glow). Put such rules in pure helpers under `src/game/` and unit-test them (`tests/ui.test.mjs`).
 - A measurement only counts if its conditions are valid (page visible, GPU named, duration stated); never average over stalls you have not explained.
 - Never hard-code a conclusion in generated evidence; compute it from the check's result (pass/fail text comes from the exit code or the count).

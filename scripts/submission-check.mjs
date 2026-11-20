@@ -62,8 +62,11 @@ for (const n of phases) {
   add('Bằng chứng', `Phase ${n}: bảng truy vết + kết quả sinh tự động`, exists(`docs/proof/phase-${n}/README.md`) && exists(`docs/proof/phase-${n}/results.md`) ? 'PASS' : 'FAIL', `docs/proof/phase-${n}/`);
   add('Bằng chứng', `Phase ${n}: giả định + tiêu chí nghiệm thu`, exists(`docs/notes/phase-${n}.md`) ? 'PASS' : 'FAIL', `docs/notes/phase-${n}.md`);
 }
-add('Bằng chứng', 'Bằng chứng khớp mã ở tag (sinh lại giống từng byte)', /0 \/ \d+ file thay đổi/.test(read('docs/proof/phase-2/clean-clone.md')) ? 'PASS' : 'MANUAL', 'clean-clone.md');
-add('Bằng chứng', 'Test cũ bị đổi có lý do', /test cũ bị Ticket-02 làm sai/i.test(read('docs/notes/phase-2.md')) ? 'PASS' : 'FAIL', 'docs/notes/phase-2.md §4');
+const lastClean = [...phases].reverse().find((n) => exists(`docs/proof/phase-${n}/clean-clone.md`));
+add('Bằng chứng', 'Bằng chứng khớp mã ở tag (sinh lại giống từng byte)', lastClean && /0 \/ \d+ file thay đổi/.test(read(`docs/proof/phase-${lastClean}/clean-clone.md`)) ? 'PASS' : 'MANUAL', `phase-${lastClean}/clean-clone.md`);
+for (const n of phases.filter((x) => x >= 2)) add('Bằng chứng', `Phase ${n}: test cũ bị đổi có lý do`, /test cũ bị .* làm sai/i.test(read(`docs/notes/phase-${n}.md`)) ? 'PASS' : 'FAIL', `docs/notes/phase-${n}.md`);
+add('Bằng chứng', 'ADR cho thay đổi luật (Phase 3 DoD)', fs.existsSync(path.join(ROOT, 'docs/adr')) && fs.readdirSync(path.join(ROOT, 'docs/adr')).length ? 'PASS' : phases.includes(3) ? 'FAIL' : 'TODO', 'docs/adr/');
+add('Bằng chứng', 'Changelog breaking changes (Phase 3 DoD)', /Breaking changes/i.test(read('CHANGELOG.md')) ? 'PASS' : phases.includes(3) ? 'FAIL' : 'TODO', 'CHANGELOG.md');
 const ai = read('docs/notes/ai-log.md');
 add('Bằng chứng', 'Nhật ký dùng AI có token/chi phí', /token/i.test(ai) ? 'PASS' : 'FAIL', 'docs/notes/ai-log.md');
 add('Bằng chứng', 'Retro', exists('docs/notes/retro.md') ? 'PASS' : 'TODO', 'Phase 4: docs/notes/retro.md');
