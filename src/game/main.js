@@ -1048,6 +1048,12 @@ show('scr-menu');
 $('fps').hidden = !params.has('fps') && !params.has('bench');
 requestAnimationFrame(frame);
 
+// screenshot helpers (not saved): ?settings[&demoConflict] opens the settings screen
+if (params.has('settings')) {
+  if (params.has('demoConflict')) settings.keys = { ...settings.keys, jump: settings.keys.interact };
+  renderKeys();
+  openSettings('scr-menu');
+}
 if (params.has('benchmark')) startBenchmark(Number(params.get('seed') || 42), Number(params.get('duration') || 30));
 // ?autostart[&night=N&lit=K&carried=C&yaw=D] skips menus (used by scripts for screenshots / FPS proof)
 if (params.has('autostart') || params.has('bench')) {
