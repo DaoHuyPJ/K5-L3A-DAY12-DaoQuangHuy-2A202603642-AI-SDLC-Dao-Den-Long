@@ -27,4 +27,5 @@
 - CSS: any element toggled with `hidden` must not get a `display` rule that overrides it (global `[hidden]{display:none!important}` exists).
 - Visuals must not suggest a state the sim does not have (e.g. only `lit` lanterns may glow). Put such rules in pure helpers under `src/game/` and unit-test them (`tests/ui.test.mjs`).
 - A measurement only counts if its conditions are valid (page visible, GPU named, duration stated); never average over stalls you have not explained.
+- Never hard-code a conclusion in generated evidence; compute it from the check's result (pass/fail text comes from the exit code or the count).
 - Small commits, one concern each. Tag `phase-N` only after `npm run verify -- phase-N` passes.

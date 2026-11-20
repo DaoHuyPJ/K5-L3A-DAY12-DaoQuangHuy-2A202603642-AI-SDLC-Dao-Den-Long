@@ -52,4 +52,5 @@ Công cụ: **Claude Code** (model Claude Opus 5.5) trong VS Code. Harness: `AGE
 - Lập `docs/proof/compliance.md`: đối chiếu từng mục RUBRIC/SUBMISSION/DoD → bằng chứng / chưa đạt / cần người làm bài.
 - **Đo FPS (DoD) — AI suýt kết luận sai hai lần:** lần 1 trung bình 71 FPS nhưng 6 giây cuối 0 FPS (trang bị headless ẩn đi); lần 2 trang hiển thị nhưng tụt về 1 FPS trong khi CPU mỗi khung chỉ ≈2 ms (khâu trình chiếu của headless dồn nhịp). Chỉ chấp nhận lần 3 (tắt vsync): 122.8 trung bình, thấp nhất 69 FPS, GPU thật. Quy tắc mới trong AGENTS.md: không lấy trung bình qua những đoạn đứng hình chưa giải thích.
 - **Chứng minh Stop hook:** chạy hook với lỗi cài cố ý → exit 2 + danh sách test đỏ; khôi phục → exit 0 (`docs/proof/phase-2/hook-check.md`).
-- Token ước tính thêm cho vòng này: ~60k vào, ~15k ra.
+- **Clone sạch — AI viết kết luận sai:** script tự in "giống từng byte" trong khi `git status` báo 118/118 file thay đổi (đã commit nhầm ở ebe5102). Kiểm lại: chỉ khác ký tự xuống dòng (LF/CRLF trên Windows). Sửa gốc bằng `.gitattributes eol=lf`, chạy lại clone mới: 0/118 khác, ghi đính chính trong `clean-clone.md`. Bài học: câu kết luận trong bằng chứng phải được tính từ kết quả kiểm, không viết sẵn.
+- Token ước tính thêm cho vòng này: ~80k vào, ~20k ra.
