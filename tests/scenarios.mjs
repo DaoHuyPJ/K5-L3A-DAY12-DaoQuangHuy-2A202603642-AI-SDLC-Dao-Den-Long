@@ -281,6 +281,8 @@ export const SCENARIOS = [
         const a = (((Math.atan2(sh.pos[2], sh.pos[0]) * 180) / Math.PI + 360) % 360);
         assert.ok(near((a - 15 + 360) % 30, 0, 0.05) || near((a - 15 + 360) % 30, 30, 0.05), `angle ${a}`);
       }
+      // spawning lasts 60 ticks (300..359) and the shade does not move meanwhile
+      assert.deepEqual(snapAt(L, 350).shades.map((x) => [x.state, x.pos]), s.shades.map((x) => ['spawning', x.pos]));
       assert.notEqual(snapAt(L, 370).shades[0].state, 'spawning');
     },
   },
@@ -509,6 +511,8 @@ export const SCENARIOS = [
     inputs: { frames: [{ tick: 0, interact: true }] },
     check(L) {
       assert.equal(evs(L, 'lantern_lit').length, 1);
+      // expel: each tick d += (6.001 - d) / ticks_left, starting from d = 0.5 with 30 ticks left -> 0.6834 at tick 1
+      assert.ok(near(dist(snapAt(L, 1).shades[0].pos, [0, 0, 25]), 0.5 + 5.501 / 30, 0.002), `${snapAt(L, 1).shades[0].pos}`);
       const d15 = dist(snapAt(L, 15).shades[0].pos, [0, 0, 25]);
       assert.ok(d15 > 0.5 && d15 < 6, `gradual ${d15}`);
       assert.ok(dist(snapAt(L, 30).shades[0].pos, [0, 0, 25]) >= 6 - 1e-3);
