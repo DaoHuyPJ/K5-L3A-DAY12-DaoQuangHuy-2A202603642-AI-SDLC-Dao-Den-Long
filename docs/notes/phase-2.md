@@ -92,3 +92,9 @@
 - **Sửa:** quy tắc thuần `src/game/lanternLook.js` — chỉ đèn `lit` mới phát sáng/chiếu/hiện vòng an toàn; đèn chưa sáng giữ màu tắt #5B5F6E và có nhãn "L2 · 6/10" kích thước cố định trên màn hình; thông báo khi nạp ghi "còn thiếu N đom đóm".
 - **Kiểm chứng:** `tests/ui.test.mjs` (hồi quy: 0, 1, 6, 9/10 không phát sáng), ảnh [lantern-progress.png](../proof/phase-2/screenshots/lantern-progress.png) (L1 đã thắp sáng + vòng, L2 6/10 tối + nhãn).
 - **Bài học:** test headless chỉ chứng minh luật đúng; cách hiển thị trạng thái cũng là yêu cầu ("đèn sáng/đèn tắt" có màu chuẩn trong ticket) và cần kiểm tra riêng.
+
+## 7. Đối chiếu lại với tab Phase 2 trên lab board (ảnh chụp người dùng gửi)
+
+- Nội dung tab **trùng khớp** bản Ticket-02 đã dán (số chuẩn, bản đồ, Phần 3, Contract v1.1, DoD). Không có yêu cầu nào bị bỏ sót.
+- Khi rà bảng màu: mặt tầng 1/2 Đêm 3 và ván cầu Đêm 2 dùng màu biến thể lệch > 10% so với cỏ #2F5D50 / gỗ #6B4A2F → đổi về màu chuẩn; bảng màu tách ra `src/game/palette.js` và có test so với bảng của ticket (`tests/ui.test.mjs`).
+- Camera trượt từ (0,0,0) tới sau lưng Mây khi vào Đêm mới / hồi sinh (ở Đêm 3 điểm đó nằm trong tháp → khung hình đầu trống). Sửa: camera nhảy thẳng tới vị trí khi vào Đêm, hồi sinh hoặc lệch > 25 m.
