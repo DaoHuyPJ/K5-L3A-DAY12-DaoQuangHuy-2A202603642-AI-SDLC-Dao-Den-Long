@@ -1,6 +1,6 @@
 # Đảo Đèn Lồng
 
-> **Video demo:** _(link video sẽ đặt ở đây — đính kèm GitHub Release `v1.0.0`)_ · **Bản chạy được:** GitHub Release `v1.0.0` → `dao-den-long-v1.0.0-web.zip`
+> **Video demo:** [demo.mp4](https://github.com/DaoHuyPJ/K5-L3A-DAY12-DaoQuangHuy-2A202603642-AI-SDLC-Dao-Den-Long/releases/download/v1.0.0/demo.mp4) (< 5 phút, đính kèm Release `v1.0.0`) · **Bản chạy được:** [Release v1.0.0](https://github.com/DaoHuyPJ/K5-L3A-DAY12-DaoQuangHuy-2A202603642-AI-SDLC-Dao-Den-Long/releases/tag/v1.0.0) → `dao-den-long-v1.0.0-web.zip`
 
 ![Đêm 1 — Đảo Bến](docs/proof/phase-4/screenshots/hud-18px.png)
 
