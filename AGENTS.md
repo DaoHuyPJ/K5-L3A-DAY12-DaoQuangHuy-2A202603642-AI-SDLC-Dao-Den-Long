@@ -8,7 +8,7 @@
 - Headless: `node src/headless.js --seed 1 --night 1|2|3 --ticks 600 --out out.jsonl [--scenario f] [--inputs f] [--snapshot-every N]`
 - Screenshot (server running): `node scripts/screenshot.mjs <dir> <name> "autostart&night=2&lit=1"` — then LOOK at the png
 - FPS proof (real time, GPU): `FPS_UNCAPPED=1 node scripts/measure-fps.mjs phase-N 30` → `docs/proof/phase-N/fps.json` (invalid if the page was ever hidden)
-- Lab requirement checklist: `docs/proof/compliance.md` — update before every tag
+- Lab requirement checklist: `docs/proof/compliance.md` + `node scripts/submission-check.mjs --online` (SUBMISSION §7, writes docs/proof/submission-check.md) — run before every tag; the final hand-in must have no FAIL/TODO
 - Web build for claude.ai artifact / static hosting: `npm run build:web` → `dist/web/`
 
 ## Layout

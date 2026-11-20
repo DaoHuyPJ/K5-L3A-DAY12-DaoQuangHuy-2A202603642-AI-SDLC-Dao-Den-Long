@@ -19,7 +19,8 @@ description: Run the game headless against the acceptance scenarios, mutation-ch
    Read `per_second` and `hidden_seconds`, not only the average.
 5. Update the traceability table in `docs/proof/phase-N/README.md` (requirement -> check -> evidence -> result).
    Never hand-edit generated files; a requirement that is not met is written as "chưa đạt" with the reason.
-6. Walk `docs/proof/compliance.md` (lab RUBRIC/SUBMISSION/DoD) and update every row before tagging.
+6. Walk `docs/proof/compliance.md` (lab RUBRIC/SUBMISSION/DoD) and update every row before tagging;
+   run `node scripts/submission-check.mjs --online` and report every FAIL to the user (repo name/public, push, MSSV are theirs).
 
 Adding a scenario: append to `SCENARIOS` in `tests/scenarios.mjs` with `name`, `req`, `seed`, `night`, `ticks`,
 optional `scenario`/`inputs`/`snapshotEvery`, and a `check(lines)` using node:assert. Derive expected

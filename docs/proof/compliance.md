@@ -56,12 +56,18 @@ Ký hiệu: ✅ có bằng chứng · 🟡 làm một phần / chỉ kiểm tay 
 | F. Sáng tạo có mục "Sáng tạo của tôi" + không đổi headless | ✅ | README; phần thêm chỉ ở `src/game/` |
 | G. Video demo < 5 phút | ⏳ | Phase 4 |
 
+## SUBMISSION §7 — kiểm tự động
+
+Chạy `node scripts/submission-check.mjs --online` → [submission-check.md](submission-check.md) (PASS/FAIL/TODO cho từng mục checklist). Bản nộp cuối phải không còn FAIL/TODO.
+
 ## SUBMISSION — việc chỉ người làm bài làm được
 
 | Việc | TT |
 |---|---|
 | MSSV thật trong `game.contract.json` → `team` (đang là `MSSV-dao-quang-huy`) | ⏳ |
-| Đổi tên repo theo quy ước `K5-<L3A/L3B>-DAY12-<HoVaTen>-<MSSV>-AI-SDLC-Dao-Den-Long`, để Public | ⏳ |
-| Push tag `phase-2` trước mốc 2h, xem CI xanh trên GitHub | ⏳ |
+| Đổi tên repo theo quy ước `K5-<L3A/L3B>-DAY12-<HoVaTen>-<MSSV>-AI-SDLC-Dao-Den-Long` | ❌ (tên hiện tại `K5-L3-LAB-Day12-AI-SDLC`) |
+| Để repo **Public** | ❌ GitHub API không thấy repo khi chưa đăng nhập → đang private |
+| Push tag `phase-2` trước mốc 2h, xem CI xanh trên GitHub | ❌ chưa push |
+| Release `v1.0.0` + video (Phase 4): máy chưa có `gh` và `ffmpeg` — tạo Release qua giao diện web GitHub, quay video bằng Xbox Game Bar (Win+Alt+R) hoặc OBS | ⏳ |
 | Không có `.env` / key trong repo | ✅ `git ls-files` không có; `.gitignore` chặn `.env*` |
 | `CREDITS.md`, `LICENSE` | ✅ |
