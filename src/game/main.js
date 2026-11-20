@@ -494,12 +494,14 @@ function onEvent(e) {
 }
 
 // ---------- main loop ----------
+const perf = { step: 0, draw: 0, render: 0 };
 let acc = 0, last = performance.now(), fpsFrames = 0, fpsT = 0, fpsSamples = [];
 let prevGrounded = true, lastSecond = -1, windWarned = false;
 function frame(now) {
   const dt = Math.min(0.25, (now - last) / 1000);
   last = now;
   camYaw += ((keys.has('ArrowLeft') ? 1 : 0) - (keys.has('ArrowRight') ? 1 : 0)) * 120 * dt;
+  const tA = performance.now();
   if (mode === 'playing') {
     acc += dt;
     while (acc >= DT && mode === 'playing') {
@@ -509,8 +511,13 @@ function frame(now) {
       acc -= DT;
     }
   } else acc = 0;
+  const tB = performance.now();
   if (game) draw(now / 1000, dt);
+  const tC = performance.now();
   renderer.render(scene, camera);
+  perf.step = tB - tA;
+  perf.draw = tC - tB;
+  perf.render = performance.now() - tC;
   fpsFrames++;
   fpsT += dt;
   if (fpsT >= 1) {
@@ -723,6 +730,15 @@ if (params.has('autostart') || params.has('bench')) {
   game.lanterns.filter((l) => !l.lit).forEach((l) => (l.deposited = Number(params.get('dep') || 0)));
   if (params.has('yaw')) camYaw = Number(params.get('yaw'));
   if (params.has('bench')) {
+    // read-only probe for scripts/measure-fps.mjs (bench mode only)
+    window.__ddl = () => {
+      let objects = 0;
+      scene.traverse(() => objects++);
+      const i = renderer.info;
+      return { mode, tick: game.tick, state: game.state, visible: document.visibilityState, flames: game.player.flames,
+        calls: i.render.calls, tris: i.render.triangles, programs: i.programs?.length, geos: i.memory.geometries, tex: i.memory.textures,
+        objects, ms: { step: +perf.step.toFixed(1), draw: +perf.draw.toFixed(1), render: +perf.render.toFixed(1) }, shades: game.shades.length, motes: game.motes.length, pos: game.player.pos.map((v) => Math.round(v)), filter: canvas.style.filter };
+    };
     // scripted circle run for the FPS measurement (keys only, sim rules unchanged)
     keys.add('KeyW');
     setInterval(() => (camYaw += 3), 50);
