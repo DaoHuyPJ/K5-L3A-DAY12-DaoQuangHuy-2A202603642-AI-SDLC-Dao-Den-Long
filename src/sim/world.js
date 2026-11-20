@@ -33,7 +33,7 @@ const idNum = (id) => Number(String(id).replace(/\D/g, '')) || 0;
  * Build a game for one night. `scenario` must already be validated by parseScenario.
  * Scenario setup emits no events and awards no score.
  */
-export function createGame({ seed = 0, night = 1, scenario = {}, tuning = TUNING } = {}) {
+export function createGame({ seed = 0, night = 1, scenario = {}, tuning = TUNING, bench = false } = {}) {
   const N = NIGHTS[night];
   if (!N) throw new Error(`unknown night ${night}`);
   const sp = scenario.player || {};
@@ -41,6 +41,7 @@ export function createGame({ seed = 0, night = 1, scenario = {}, tuning = TUNING
     tuning,
     night,
     N,
+    bench, // Ticket-04 benchmark scene: no spawns, damage, pickups, fuel decay or end of night
     rng: makeRng(seed),
     tick: 0,
     simTick: 0,
@@ -324,12 +325,12 @@ export function step(g, input) {
 
   // 2. counters (incl. lantern fuel: decay + drain), then lanterns with fuel <= 0 go out
   countdown(g);
-  fuelStep(g, emit);
+  if (!g.bench) fuelStep(g, emit);
 
   // 3. player movement, then fall check
   movePlayer(g, input, edge, emit);
 
-  if (!p.waiting) {
+  if (!p.waiting && !g.bench) {
     // 4. pickups
     pickups(g, emit);
     // 5. lanterns
@@ -343,8 +344,9 @@ export function step(g, input) {
   moveShades(g);
   moveDrifters(g);
   // 9. contact: drifters steal first, then shades hit (id order)
-  if (!p.waiting) contacts(g, emit);
+  if (!p.waiting && !g.bench) contacts(g, emit);
   // 10. scheduled spawns
+  if (g.bench) return events;
   spawns(g, emit);
   // 11. win / lose
   // Ticket-03: no early win. At dawn: alive and lit >= ceil(win_ratio * total) -> won.
@@ -707,7 +709,7 @@ function moveShades(g) {
         s.drainTarget = null;
       }
     } else {
-      if (s.state === 'wander' && !fresh && dPlayer <= R.shade_detect) s.state = 'chase';
+      if (s.state === 'wander' && !fresh && !g.bench && dPlayer <= R.shade_detect) s.state = 'chase';
       else if (s.state === 'chase' && dPlayer > R.shade_lose) s.state = 'wander';
       if (s.state === 'chase') {
         const [dx, dz] = moveToward(s.pos, [p.pos[0], p.pos[2]], speed);
