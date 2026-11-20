@@ -84,3 +84,11 @@
 - **Hồi quy Phase 1:** mọi yêu cầu Phase 1 vẫn có scenario (R01–R22) chạy với số chuẩn; thay đổi kỳ vọng nào cũng ghi ở mục 4.
 - **Chỉ kiểm tay / chưa đạt:** FPS ≥ 30 chưa đo trên máy thật; cài đặt lưu giữa các lần mở, âm thanh, chuỗi menu mới chỉ kiểm bằng chơi tay; chưa có test tự động cho UI.
 - **Mutation check tìm ra 2 lỗ hổng test** (Bóng Mực `spawning` di chuyển, Bóng Mực đang bị đẩy ra vẫn đuổi) → đã thêm kiểm tra tính tay vào R20, P15.
+
+## 6. Lỗi người dùng báo sau khi chơi thử: "thắp đèn hết rồi vẫn tính là chưa thắp"
+
+- **Triệu chứng:** đèn trông đã sáng nhưng HUD vẫn "Đèn 0/5", không thắng.
+- **Điều tra:** logic đúng (nạp 6 → `deposited 6, lit false`; thêm 4 → `lit true`, có scenario R07/R08/R17). Lỗi ở **hiển thị**: đèn nạp dở được vẽ phát sáng theo tỉ lệ (9/10 gần như sáng hẳn, có cả lõi sáng và đèn chiếu). Với số chuẩn mới (chi phí 10 = đúng sức chứa, Tỏa Sáng tốn 3) người chơi hầu như luôn nạp dở, nên lỗi lộ ra ở Phase 2.
+- **Sửa:** quy tắc thuần `src/game/lanternLook.js` — chỉ đèn `lit` mới phát sáng/chiếu/hiện vòng an toàn; đèn chưa sáng giữ màu tắt #5B5F6E và có nhãn "L2 · 6/10" kích thước cố định trên màn hình; thông báo khi nạp ghi "còn thiếu N đom đóm".
+- **Kiểm chứng:** `tests/ui.test.mjs` (hồi quy: 0, 1, 6, 9/10 không phát sáng), ảnh [lantern-progress.png](../proof/phase-2/screenshots/lantern-progress.png) (L1 đã thắp sáng + vòng, L2 6/10 tối + nhãn).
+- **Bài học:** test headless chỉ chứng minh luật đúng; cách hiển thị trạng thái cũng là yêu cầu ("đèn sáng/đèn tắt" có màu chuẩn trong ticket) và cần kiểm tra riêng.

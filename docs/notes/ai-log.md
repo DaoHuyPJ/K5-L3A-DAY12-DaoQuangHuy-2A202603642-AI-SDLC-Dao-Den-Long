@@ -41,6 +41,8 @@ Công cụ: **Claude Code** (model Claude Opus 5.5) trong VS Code. Harness: `AGE
 - Script chụp ảnh bằng bash ghi sai tên file (`screenshots$1.png`) do cách bash xử lý `\$1` → chuyển sang `scripts/screenshot.mjs` (Node), dùng profile Edge tạm riêng (Edge đang mở của người dùng làm lệnh chụp không ghi file).
 - Một mutation (dốc ở Đêm 3) áp vào nhầm file nên kết quả "fail 0" là giả; chạy lại đúng file thì bị bắt. Đã ghi rõ trong mutation-check.md thay vì xóa dòng.
 
+- **Người dùng chơi thử phát hiện:** đèn nạp dở trông như đã sáng nhưng HUD báo 0/5. AI đã vẽ đèn sáng theo tỉ lệ tiến độ — không vi phạm test nào nhưng sai ý nghĩa "đèn sáng / đèn tắt". Sửa + test hồi quy `tests/ui.test.mjs` (xem phase-2.md §6). Lab board tab Phase 2 nạp nội dung từ database của trang (tổ chức khác) nên agent không đọc được; dùng bản ticket người dùng dán.
+
 **Harness thay đổi:** AGENTS.md (v1.1, thứ tự 12 bước, quy tắc mutation, quy tắc `hidden`, lệnh screenshot/build:web), skill `verify-game` (bước mutation, FPS phải đo máy thật), `scripts/screenshot.mjs`.
 
 **Token / chi phí (ước tính):** ~250–300k token vào, ~70k token ra (ticket dài + viết lại sim/UI). Tiết kiệm: không đọc lại file lớn sau khi sửa; patch nhỏ bằng script thay vì viết lại file; scenario dạng dữ liệu dùng chung cho test + bằng chứng; chỉ xem ảnh chụp khi cần xác nhận UI.

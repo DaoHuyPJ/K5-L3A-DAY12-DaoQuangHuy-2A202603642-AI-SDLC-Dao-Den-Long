@@ -23,4 +23,5 @@
 - A requirement change that breaks an old test: update it **with a reason** in `docs/notes/phase-N.md` (table "test cũ bị làm sai"). Never delete or skip silently.
 - Don't invent requirements; quote the ticket. Ambiguity → numbered assumption in `docs/notes/phase-N.md`.
 - CSS: any element toggled with `hidden` must not get a `display` rule that overrides it (global `[hidden]{display:none!important}` exists).
+- Visuals must not suggest a state the sim does not have (e.g. only `lit` lanterns may glow). Put such rules in pure helpers under `src/game/` and unit-test them (`tests/ui.test.mjs`).
 - Small commits, one concern each. Tag `phase-N` only after `npm run verify -- phase-N` passes.
