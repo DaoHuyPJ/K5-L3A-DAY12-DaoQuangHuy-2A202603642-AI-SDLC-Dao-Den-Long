@@ -10,7 +10,8 @@
     "start": "node server.js",
     "test": "node --test",
     "headless": "node src/headless.js",
-    "verify": "node scripts/verify.mjs"
+    "verify": "node scripts/verify.mjs",
+    "build:web": "node scripts/build-web.mjs"
   },
   "dependencies": {
     "three": "0.160.0"
