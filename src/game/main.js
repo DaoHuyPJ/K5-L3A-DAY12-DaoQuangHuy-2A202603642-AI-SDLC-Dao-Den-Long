@@ -181,12 +181,35 @@ addEventListener('keydown', (e) => {
   if (e.code === 'Space') e.preventDefault();
 });
 addEventListener('keyup', (e) => keys.delete(e.code));
+// Mouse look: click the scene to lock the pointer (Esc releases); fallback = drag with any button.
+// Horizontal -> yaw (sent to the sim as cam_yaw_deg), vertical -> camera pitch, wheel -> zoom (view only).
+let camPitch = 33; // degrees above the horizon
+let camDist = 10.8; // metres from the player
 let dragging = false;
-renderer.domElement.addEventListener('mousedown', () => (dragging = true));
+const canvas = renderer.domElement;
+const locked = () => document.pointerLockElement === canvas;
+canvas.addEventListener('mousedown', () => {
+  dragging = true;
+  if (mode === 'playing' && !locked() && canvas.requestPointerLock) {
+    try {
+      const r = canvas.requestPointerLock();
+      if (r && r.catch) r.catch(() => {});
+    } catch {
+      /* pointer lock unavailable: drag still works */
+    }
+  }
+});
 addEventListener('mouseup', () => (dragging = false));
 addEventListener('mousemove', (e) => {
-  if (dragging) camYaw -= e.movementX * 0.3;
+  if (!locked() && !dragging) return;
+  camYaw -= e.movementX * 0.25;
+  camPitch = Math.min(70, Math.max(8, camPitch + e.movementY * 0.2));
 });
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  camDist = Math.min(18, Math.max(5, camDist + Math.sign(e.deltaY) * 0.8));
+}, { passive: false });
+document.addEventListener('pointerlockchange', () => $('hint').classList.toggle('dim', locked()));
 
 function readInput() {
   const k = (c) => (keys.has(c) ? 1 : 0);
@@ -290,7 +313,9 @@ function draw(t, dt) {
   // camera: behind the player, looking along the contract's yaw-forward (sinθ, cosθ)
   const th = (camYaw * Math.PI) / 180;
   const fx = Math.sin(th), fz = Math.cos(th);
-  camera.position.lerp(new THREE.Vector3(p.pos[0] - fx * 9, p.pos[1] + 6, p.pos[2] - fz * 9), 1 - Math.pow(0.001, dt));
+  const ph = (camPitch * Math.PI) / 180;
+  const back = Math.cos(ph) * camDist, up = Math.sin(ph) * camDist + 1.2;
+  camera.position.lerp(new THREE.Vector3(p.pos[0] - fx * back, p.pos[1] + up, p.pos[2] - fz * back), 1 - Math.pow(1e-5, dt));
   camera.lookAt(p.pos[0] + fx * 2, p.pos[1] + 1.2, p.pos[2] + fz * 2);
 
   let lit = 0;

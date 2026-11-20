@@ -12,6 +12,7 @@
     #hud .box { background: rgba(20, 10, 35, .55); border: 1px solid rgba(255, 190, 110, .25); border-radius: 10px; padding: 6px 12px; }
     #hint { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 13px; opacity: .75;
             background: rgba(20,10,35,.5); padding: 5px 12px; border-radius: 8px; pointer-events: none; text-align: center; }
+    #hint.dim { opacity: .35; }
     #toast { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); font-size: 20px; color: #ffcf7a;
              text-shadow: 0 0 10px #ff9a2e; transition: opacity .4s; opacity: 0; pointer-events: none; }
     #overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(8, 4, 16, .72); }
@@ -35,7 +36,7 @@
     <div class="box" id="h-pulse"></div>
   </div>
   <div id="toast"></div>
-  <div id="hint">WASD di chuyển · Chuột kéo / ← → xoay camera · Space nhảy · E nạp đèn · F tỏa sáng · R chơi lại</div>
+  <div id="hint">WASD di chuyển · Bấm vào màn hình rồi rê chuột để xoay camera (Esc nhả chuột) · Lăn chuột zoom · ← → xoay · Space nhảy · E nạp đèn · F tỏa sáng · R chơi lại</div>
   <div id="overlay">
     <div id="panel">
       <h1 id="o-title">Đảo Đèn Lồng</h1>

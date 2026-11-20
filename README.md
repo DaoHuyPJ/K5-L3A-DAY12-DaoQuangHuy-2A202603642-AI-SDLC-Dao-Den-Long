@@ -32,7 +32,8 @@ npm run verify -- phase-1   # chạy lại scenario, sinh docs/proof/phase-1/res
 | Phím | Hành động |
 |---|---|
 | W A S D | Di chuyển (theo hướng camera) |
-| Kéo chuột / ← → | Xoay camera |
+| Bấm vào màn hình rồi rê chuột (Esc nhả) · kéo chuột · ← → | Xoay camera (rê lên/xuống: nâng/hạ góc) |
+| Lăn chuột | Zoom camera |
 | Space | Nhảy |
 | E | Nạp đom đóm vào Đèn Lồng gần nhất (trong 2.5 m) |
 | F | Tỏa sáng: tốn 1 đom đóm, choáng + đẩy lùi Bóng Mực trong 6 m |
