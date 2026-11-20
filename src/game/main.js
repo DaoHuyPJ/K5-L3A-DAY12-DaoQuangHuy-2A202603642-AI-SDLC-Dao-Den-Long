@@ -6,6 +6,8 @@ import { capacity, createGame, lightCost, makeRng, step } from '../sim/world.js'
 import { Sfx } from './sfx.js';
 import { blinkOn, lanternLook } from './lanternLook.js';
 import { C } from './palette.js';
+import { ACTIONS, DEFAULT_KEYS, findConflicts, keyLabel, loadKeys } from './keys.js';
+import { addEntry, cleanEntries, makeEntry, validName } from './leaderboard.js';
 import { BENCH, benchCamera, benchStats, createBenchGame } from '../sim/bench.js';
 
 const $ = (id) => document.getElementById(id);
@@ -14,12 +16,13 @@ const params = new URLSearchParams(location.search);
 
 
 // ---------- settings (saved between sessions) ----------
-const settings = { volume: 0.7, sens: 0.25, colorBlind: false };
+const settings = { volume: 0.7, sens: 0.25, colorBlind: false, cues: true, calm: matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false, big: false, keys: { ...DEFAULT_KEYS }, lastName: '' };
 try {
   Object.assign(settings, JSON.parse(localStorage.getItem('ddl-settings') || '{}'));
 } catch {
   /* storage unavailable: defaults */
 }
+settings.keys = loadKeys(settings.keys);
 const saveSettings = () => {
   try {
     localStorage.setItem('ddl-settings', JSON.stringify(settings));
@@ -167,11 +170,11 @@ function buildWorld(night) {
     // progress label above unlit lanterns ("L1 · 6/10")
     const labelCanvas = document.createElement('canvas');
     labelCanvas.width = 256;
-    labelCanvas.height = 64;
+    labelCanvas.height = 80;
     const labelTex = new THREE.CanvasTexture(labelCanvas);
     labelTex.colorSpace = THREE.SRGBColorSpace;
     const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTex, depthTest: false, transparent: true, sizeAttenuation: false }));
-    label.scale.set(0.16, 0.04, 1); // constant on-screen size
+    label.scale.set(0.28, 0.0875, 1); // constant on-screen size: 34 px canvas text -> ~19 px on screen (Ticket-04 §4)
     label.position.y = 4.8;
     // torn paper (colour-blind mode): two dark crossing rips on the front and back of the paper
     const tear = new THREE.Group();
@@ -188,6 +191,7 @@ function buildWorld(night) {
     world.add(group);
     lanternViews.set(`L${i + 1}`, { group, paper, paperMat, coreMat, ring, light, glow: 0, label, labelCanvas, labelTex, labelText: '', tear });
   });
+  applyA11y(); // label size follows the large-text setting
 }
 
 // ---------- Mây ----------
@@ -371,7 +375,7 @@ for (let i = 0; i < LEAVES * 3; i++) leafGeo.attributes.position.array[i] = (lea
 // ---------- input ----------
 const keys = new Set();
 const latch = { jump: false, interact: false, pulse: false, dash: false };
-const KEYMAP = { Space: 'jump', KeyE: 'interact', KeyF: 'pulse', ShiftLeft: 'dash', ShiftRight: 'dash' };
+let rebinding = null; // action waiting for a key (settings screen)
 let camYaw = 0, camPitch = 30, camDist = 11, dragging = false;
 const locked = () => document.pointerLockElement === canvas;
 function lockPointer() {
@@ -384,13 +388,22 @@ function lockPointer() {
 }
 let lastPauseAt = 0;
 addEventListener('keydown', (e) => {
+  if (rebinding) {
+    e.preventDefault();
+    if (e.code !== 'Escape') settings.keys[rebinding] = e.code; // Esc cancels
+    rebinding = null;
+    saveSettings();
+    renderKeys();
+    return;
+  }
   keys.add(e.code);
-  if (KEYMAP[e.code]) latch[KEYMAP[e.code]] = true;
-  if ((e.code === 'Escape' || e.code === 'KeyP') && performance.now() - lastPauseAt > 300) {
+  const K = settings.keys;
+  for (const a of ['jump', 'interact', 'pulse', 'dash']) if (e.code === K[a]) latch[a] = true;
+  if ((e.code === 'Escape' || e.code === K.pause) && performance.now() - lastPauseAt > 300) {
     if (mode === 'playing') pauseGame();
     else if (mode === 'paused') resumeGame();
   }
-  if (e.code === 'Space') e.preventDefault();
+  if (mode === 'playing' && Object.values(K).includes(e.code)) e.preventDefault();
 });
 addEventListener('keyup', (e) => keys.delete(e.code));
 canvas.addEventListener('mousedown', () => {
@@ -413,14 +426,15 @@ document.addEventListener('pointerlockchange', () => {
 function readInput() {
   const k = (c) => (keys.has(c) ? 1 : 0);
   // contract: at yaw 0, move x = world +X, z = world +Z. Camera looks along +Z, so screen-right is -X.
-  const held = (name, ...codes) => codes.some((c) => keys.has(c)) || latch[name];
+  const K = settings.keys;
+  const held = (name) => keys.has(K[name]) || latch[name];
   return {
-    move: [k('KeyA') - k('KeyD'), k('KeyW') - k('KeyS')],
+    move: [k(K.left) - k(K.right), k(K.up) - k(K.down)],
     cam_yaw_deg: camYaw,
-    jump: held('jump', 'Space'),
-    interact: held('interact', 'KeyE'),
-    pulse: held('pulse', 'KeyF'),
-    dash: held('dash', 'ShiftLeft', 'ShiftRight'),
+    jump: held('jump'),
+    interact: held('interact'),
+    pulse: held('pulse'),
+    dash: held('dash'),
   };
 }
 
@@ -444,7 +458,7 @@ const show = (id) => {
 
 function prepareNight(n) {
   night = n;
-  game = createGame({ seed: (Math.random() * 2 ** 32) >>> 0, night: n });
+  game = createGame({ seed: (runSeed + n * 7919 + Math.floor(Math.random() * 1e6)) >>> 0, night: n });
   buildWorld(n);
   clearEntities();
   camYaw = 0;
@@ -492,6 +506,8 @@ function openSettings(from) {
 $('b-start').onclick = () => {
   sfx.unlock();
   totalScore = 0;
+  nightsWon = 0;
+  runSeed = (Math.random() * 2 ** 31) >>> 0;
   prepareNight(1);
 };
 $('b-go').onclick = play;
@@ -523,6 +539,128 @@ $('s-sens').oninput = (e) => {
   saveSettings();
 };
 
+// ---------- Ticket-04 §4 accessibility ----------
+function renderKeys() {
+  const K = settings.keys;
+  const conflicts = findConflicts(K);
+  const list = $('keys-list');
+  list.replaceChildren();
+  for (const [a, name] of ACTIONS) {
+    const lab = document.createElement('span');
+    lab.textContent = name;
+    const b = document.createElement('button');
+    b.className = 'ghost' + (conflicts[a] ? ' conflict' : '');
+    b.id = `key-${a}`;
+    b.textContent = rebinding === a ? 'Nhấn phím… (Esc huỷ)' : keyLabel(K[a]) + (conflicts[a] ? ' ⚠' : '');
+    b.onclick = () => {
+      rebinding = a;
+      renderKeys();
+    };
+    list.append(lab, b);
+  }
+  const names = Object.fromEntries(ACTIONS);
+  const pairs = Object.entries(conflicts).filter(([a, others]) => others.every((o) => ACTIONS.findIndex((x) => x[0] === o) > ACTIONS.findIndex((x) => x[0] === a)));
+  $('keys-warn').textContent = pairs.length ? `⚠ Trùng phím: ${pairs.map(([a, o]) => `${names[a]} và ${o.map((x) => names[x]).join(', ')} (${keyLabel(K[a])})`).join(' · ')}` : '';
+  $('cd-dash-label').innerHTML = `${keyLabel(K.dash)}<br />Lướt`;
+  $('cd-pulse-label').innerHTML = `${keyLabel(K.pulse)}<br />Tỏa sáng`;
+  $('menu-keys').textContent = `${[K.up, K.left, K.down, K.right].map(keyLabel).join('')} đi · Chuột xoay camera · ${keyLabel(K.jump)} nhảy · ${keyLabel(K.dash)} lướt · ${keyLabel(K.interact)} nạp/châm dầu · ${keyLabel(K.pulse)} tỏa sáng · ${keyLabel(K.pause)}/Esc tạm dừng`;
+}
+$('b-keys-reset').onclick = () => {
+  settings.keys = { ...DEFAULT_KEYS };
+  rebinding = null;
+  saveSettings();
+  renderKeys();
+};
+function applyA11y() {
+  document.body.classList.toggle('calm', settings.calm);
+  document.documentElement.classList.toggle('bigtext', settings.big);
+  $('s-cues').checked = settings.cues;
+  $('s-calm').checked = settings.calm;
+  $('s-big').checked = settings.big;
+  for (const v of lanternViews.values()) v.label.scale.set(0.28 * (settings.big ? 1.25 : 1), 0.0875 * (settings.big ? 1.25 : 1), 1);
+}
+for (const [id, key] of [['s-cues', 'cues'], ['s-calm', 'calm'], ['s-big', 'big']]) {
+  $(id).onchange = (e) => {
+    settings[key] = e.target.checked;
+    saveSettings();
+    applyA11y();
+  };
+}
+renderKeys();
+
+// ---------- Ticket-04 §3 leaderboard (server file when available, localStorage otherwise) ----------
+let runSeed = 0;
+let nightsWon = 0;
+let savedThisResult = false;
+const LB_KEY = 'ddl-leaderboard';
+const localBoard = () => {
+  try {
+    return cleanEntries(JSON.parse(localStorage.getItem(LB_KEY) || '[]'));
+  } catch {
+    return [];
+  }
+};
+const storeLocal = (entries) => {
+  try {
+    localStorage.setItem(LB_KEY, JSON.stringify(entries));
+  } catch {
+    /* ignore */
+  }
+};
+async function loadBoard() {
+  try {
+    const r = await fetch('/api/leaderboard');
+    if (r.ok) return cleanEntries((await r.json()).entries);
+  } catch {
+    /* no server (e.g. static hosting) */
+  }
+  return localBoard();
+}
+async function saveScore() {
+  const name = $('lb-name').value.trim();
+  if (!validName(name)) {
+    $('lb-msg').textContent = '⚠ Tên phải có 3–12 ký tự: chữ (có dấu được), số hoặc _';
+    return;
+  }
+  const entry = makeEntry({ name, score: totalScore, nights_won: nightsWon, seed: runSeed });
+  let entries = null;
+  try {
+    const r = await fetch('/api/leaderboard', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry) });
+    if (r.ok) entries = cleanEntries((await r.json()).entries);
+  } catch {
+    /* fall back to local storage */
+  }
+  if (!entries) entries = addEntry(localBoard(), entry);
+  storeLocal(entries);
+  settings.lastName = name;
+  saveSettings();
+  savedThisResult = true;
+  $('b-lb-save').disabled = true;
+  const rank = entries.findIndex((e) => e.name === entry.name && e.achieved_at === entry.achieved_at && e.score === entry.score) + 1;
+  $('lb-msg').textContent = rank ? `Đã lưu! Hạng #${rank}` : 'Đã lưu (chưa vào top 10).';
+}
+$('b-lb-save').onclick = saveScore;
+async function showLeaderboard() {
+  const entries = await loadBoard();
+  const list = $('lb-list');
+  list.replaceChildren(...entries.map((e) => {
+    const li = document.createElement('li');
+    li.textContent = `${e.name} — ${e.score} điểm · ${e.nights_won}/3 đêm · ${e.achieved_at.replace('T', ' ').slice(0, 16)}`;
+    return li;
+  }));
+  $('lb-empty').hidden = entries.length > 0;
+  show('scr-leaderboard');
+}
+$('b-leaderboard').onclick = showLeaderboard;
+$('b-lb-back').onclick = toMenu;
+function offerLeaderboard(on) {
+  $('lb-form').hidden = !on;
+  savedThisResult = false;
+  $('b-lb-save').disabled = false;
+  $('lb-msg').textContent = '';
+  if (on) $('lb-name').value = settings.lastName || '';
+}
+
 function showResult({ result, reason }) {
   mode = 'result';
   if (locked()) document.exitPointerLock?.();
@@ -530,6 +668,7 @@ function showResult({ result, reason }) {
   if (result === 'won') {
     sfx.win();
     totalScore += game.score;
+    nightsWon++;
     if (night < 3) {
       $('r-title').textContent = `Đêm ${night} hoàn thành!`;
       $('r-text').innerHTML = `${why[reason]}<br/>Điểm đêm: <b>${game.score}</b> · Tổng: <b>${totalScore}</b>`;
@@ -540,10 +679,7 @@ function showResult({ result, reason }) {
       $('r-title').textContent = 'Bình Minh';
       $('r-text').innerHTML = `Ba hòn đảo đã sáng trở lại. Mặt trời lên trên biển mây.<br/>Tổng điểm: <b>${totalScore}</b>`;
       $('b-next').textContent = 'Chơi lại từ đầu';
-      $('b-next').onclick = () => {
-        totalScore = 0;
-        prepareNight(1);
-      };
+      $('b-next').onclick = () => $('b-start').onclick();
     }
   } else {
     sfx.lose();
@@ -552,6 +688,7 @@ function showResult({ result, reason }) {
     $('b-next').textContent = `Chơi lại Đêm ${night}`;
     $('b-next').onclick = () => prepareNight(night);
   }
+  offerLeaderboard(result === 'lost' || night === 3);
   setTimeout(() => show('scr-result'), 700);
 }
 
@@ -578,8 +715,8 @@ function onEvent(e) {
     case 'lantern_out': sfx.lose(); toast(`Đèn ${e.data.lantern_id} đã cạn dầu và tắt!`); break;
     case 'pulse': sfx.pulse(); pulseT = 0; break;
     case 'dash': sfx.dash(); break;
-    case 'player_hit': sfx.hit(); flash = 1; toast(e.data.by === 'fall' ? 'Mây rơi xuống biển mây!' : e.data.dropped ? `Bị Bóng Mực chạm! Rơi ${e.data.dropped} đom đóm` : 'Bị Bóng Mực chạm!'); break;
-    case 'shade_spawned': sfx.shade(); break;
+    case 'player_hit': sfx.hit(); flash = settings.calm ? 0 : 1; toast(e.data.by === 'fall' ? 'Mây rơi xuống biển mây!' : e.data.dropped ? `Bị Bóng Mực chạm! Rơi ${e.data.dropped} đom đóm` : 'Bị Bóng Mực chạm!'); break;
+    case 'shade_spawned': sfx.shade(); lastSpawn = { id: e.data.id, until: performance.now() + 3000 }; break;
     case 'charm_picked': sfx.charm(); toast('Bùa Gió! Chạy nhanh hơn, lướt không cần chờ'); break;
     case 'drifter_steal': sfx.steal(); toast(`Gió Lạc cướp ${e.data.amount} đom đóm!`); break;
     case 'drifter_drop': toast('Gió Lạc đánh rơi đom đóm!'); break;
@@ -676,22 +813,22 @@ function draw(t, dt) {
     if (key !== v.labelText) {
       v.labelText = key;
       const c = v.labelCanvas.getContext('2d');
-      c.clearRect(0, 0, 256, 64);
+      c.clearRect(0, 0, 256, 80);
       c.fillStyle = 'rgba(14, 20, 48, 0.75)';
-      c.fillRect(0, 4, 256, 56);
-      c.font = 'bold 26px system-ui, sans-serif';
+      c.fillRect(0, 2, 256, 76);
+      c.font = 'bold 34px system-ui, sans-serif';
       c.textAlign = 'center';
       c.textBaseline = 'middle';
       if (look.fuelBar === null) {
         c.fillStyle = l.deposited > 0 ? '#FFB347' : '#F5F1E6';
-        c.fillText(look.label, 128, 33);
+        c.fillText(look.label, 128, 41);
       } else {
         c.fillStyle = '#F5F1E6';
-        c.fillText(look.label, 128, 20);
+        c.fillText(look.label, 128, 26);
         c.fillStyle = 'rgba(255,255,255,0.15)';
-        c.fillRect(16, 40, 224, 12);
+        c.fillRect(16, 54, 224, 14);
         c.fillStyle = look.blink ? (settings.colorBlind ? '#FFFFFF' : '#FF5A5F') : '#FFB347';
-        c.fillRect(16, 40, 224 * look.fuelBar, 12);
+        c.fillRect(16, 54, 224 * look.fuelBar, 14);
       }
       v.labelTex.needsUpdate = true;
     }
@@ -747,9 +884,52 @@ function draw(t, dt) {
   }
   if (w.warning && !w.active && !windWarned && mode === 'playing') sfx.windWarn();
   windWarned = w.warning && !w.active;
-  $('h-wind').hidden = !(w.warning && !w.active);
+  drawCues(w);
 
   drawHud(lit);
+}
+
+// ---------- Ticket-04 §4 captions / visual cues (shade spawned + edge arrow, wind, last 10 s, fuel < 30) ----------
+let lastSpawn = null;
+function placeEdgeArrow(el, pos, onlyOffscreen = true) {
+  tmpV.set(pos[0], pos[1] + 1, pos[2]).project(camera);
+  const behind = tmpV.z > 1;
+  let x = tmpV.x, y = tmpV.y;
+  if (onlyOffscreen && !behind && Math.abs(x) <= 0.95 && Math.abs(y) <= 0.95) {
+    el.hidden = true;
+    return;
+  }
+  if (behind) {
+    x = -x;
+    y = -y;
+  }
+  const a = Math.atan2(x, y);
+  const r = Math.min(innerWidth, innerHeight) / 2 - 60;
+  el.hidden = false;
+  el.style.left = `${innerWidth / 2 + Math.sin(a) * r - 14}px`;
+  el.style.top = `${innerHeight / 2 - Math.cos(a) * r - 15}px`;
+  el.style.transform = `rotate(${a}rad)`;
+}
+function drawCues(w) {
+  const lines = [];
+  const now = performance.now();
+  const secs = Math.ceil(game.ticksLeft / TICK_RATE);
+  const spawnActive = lastSpawn && now < lastSpawn.until && mode === 'playing';
+  if (spawnActive) lines.push('⚠ Bóng Mực xuất hiện');
+  if (w.warning && !w.active) lines.push('🍃 Gió sắp thổi');
+  if (w.active) lines.push('🍃 Gió đang thổi');
+  if (secs <= 10 && secs > 0) lines.push(`⏳ ${secs} giây cuối`);
+  for (const l of game.lanterns) if (l.lit && l.fuelT < TUNING.low_fuel_threshold * TICK_RATE) lines.push(`🏮 ${l.id} sắp cạn dầu (${Math.floor(l.fuelT / TICK_RATE)})`);
+  const visible = settings.cues && mode === 'playing' && !bench;
+  const box = $('h-cues');
+  const key = visible ? lines.join('|') : '';
+  if (box._k !== key) {
+    box._k = key;
+    box.replaceChildren(...(visible ? lines : []).map((t) => Object.assign(document.createElement('div'), { textContent: t })));
+  }
+  const shade = spawnActive && game.shades.find((s) => s.id === lastSpawn.id);
+  if (visible && shade) placeEdgeArrow($('h-shade-arrow'), shade.pos, false);
+  else $('h-shade-arrow').hidden = true;
 }
 
 const bar = $('h-bar');
