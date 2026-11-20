@@ -73,3 +73,10 @@ Quyết định thiết kế: [ADR 0001](../adr/0001-lantern-fuel-and-dawn-win.m
 - **Đạt (tự động):** toàn bộ luật Ticket-03 có scenario (Q01–Q16 + sửa R/P); 99 test xanh; mutation 16/16 bị bắt ([mutation-check.md](../proof/phase-3/mutation-check.md)); hồi quy Phase 1–2 không bị thay vẫn xanh.
 - **AI suýt sai:** đoạn `autostart` dùng để chụp ảnh bật `lit` mà không có dầu → mọi đèn tắt ngay ở tick 1, nhãn hiện "0/5" (lộ ra nhờ xem ảnh). Luật đúng, công cụ chụp ảnh còn theo mô hình cũ. Đã sửa.
 - **Chỉ kiểm tay:** cảm giác chơi với dầu (độ khó), chế độ mù màu trong cửa sổ thật (ảnh chụp từ xa khó thấy vết rách).
+
+## 6. Lỗi người dùng báo: "hình như chưa có chế độ mù màu"
+
+- **Điều tra:** chế độ đã có (Cài đặt → ô "Bảng màu dễ phân biệt", code + test), nhưng (1) chỉ bật được sâu trong Cài đặt, không có gì báo ở menu; (2) thay đổi khó thấy: vết rách 0.5 × 0.35 m chỉ ở mặt trước, nhìn từ camera gần như không thấy; đồng hồ chỉ đổi khi ≤ 30 s.
+- **Sửa:** nút "Bảng màu dễ phân biệt: BẬT/TẮT" ở menu chính và menu tạm dừng (một hàm `setColorBlind` đồng bộ cả ô Cài đặt, lưu lại); huy hiệu 👁 trên HUD khi bật; vết rách thành hình chữ X tối ở cả hai mặt giấy; nhãn đèn có biểu tượng hình dạng ✖ (tắt) / ☀ (sáng) để phân biệt không cần màu.
+- **Kiểm chứng:** `tests/ui.test.mjs` (nhãn có biểu tượng chỉ ở chế độ mù màu), ảnh so sánh cùng góc [cb-off-normal.png](../proof/phase-3/screenshots/cb-off-normal.png) ↔ [cb-off-colorblind.png](../proof/phase-3/screenshots/cb-off-colorblind.png), [menu-cb-toggle.png](../proof/phase-3/screenshots/menu-cb-toggle.png).
+- **Bài học:** "có tính năng" chưa đủ — tính năng tiếp cận phải dễ tìm và thấy rõ ở khoảng cách chơi thật; kiểm bằng ảnh chụp ở góc nhìn người chơi, không chỉ unit test.

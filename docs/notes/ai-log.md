@@ -75,3 +75,5 @@ Công cụ: **Claude Code** (model Claude Opus 5.5) trong VS Code. Harness: `AGE
 ### Harness — thêm skill bên ngoài (sau tag phase-3)
 
 Người dùng đề xuất repo `gamedev-skills/awesome-gamedev-agent-skills` (Apache-2.0). Agent clone vào thư mục tạm, **không chạy gì**, đọc và quét nội dung (chỉ Markdown, không script, không lệnh mạng/xóa, không câu chèn lệnh). Chỉ chọn 5/~80 skill hợp với Three.js + vấn đề đang mở (hiệu năng, UI/khả năng tiếp cận, juice), chép nguyên văn kèm LICENSE + NOTICE vào `.claude/skills/`, ghi CREDITS và quy tắc trong AGENTS.md: skill bên ngoài nhắm three r187, repo dùng 0.160 → luật dự án và ticket thắng. Lý do không cài cả bộ: mỗi skill thêm mô tả vào ngữ cảnh mọi lần chạy (tốn token), rubric chấm harness "nhỏ, hữu ích".
+
+- **Người dùng báo "chưa có chế độ mù màu":** tính năng có nhưng giấu trong Cài đặt và hiệu ứng quá nhỏ (agent chỉ kiểm bằng unit test + một ảnh chụp từ xa). Sửa: nút ở menu, huy hiệu HUD, vết rách chữ X, biểu tượng ✖/☀ trên nhãn; kiểm bằng ảnh so sánh cùng góc (phase-3.md §6).

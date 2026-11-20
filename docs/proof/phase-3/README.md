@@ -24,7 +24,7 @@ Quyết định thiết kế: [ADR 0001](../../adr/0001-lantern-fuel-and-dawn-wi
 | §3 Thứ tự: trừ dầu ở bước 2, tắt ngay sau bước 2 | Q02 (tắt đúng tick 60), Q06 (tick 201) | Đạt |
 | §4 Sức chứa 10 + 2×thắp (cả thắp lại), tối đa 20; HUD mang/sức chứa | R07, Q04, Q11 + ảnh HUD "6/10" | Đạt |
 | §5 Điểm mới (+5, +100, +40, +5/+15, bình minh 50+floor(fuel), +50/lửa, bỏ thưởng thời gian) | R07, R08, Q03, Q04, Q09, R17 | Đạt |
-| §6 Mù màu: viền/mắt Bóng #00B3FF, cảnh báo #FFFFFF + ⚠, đèn tắt xẹp 20% + rách, lưu cài đặt | `tests/ui.test.mjs` (bảng màu + quy tắc đèn), [colorblind.png](screenshots/colorblind.png) | Đạt (vết rách khó thấy trong ảnh chụp từ xa — kiểm tay) |
+| §6 Mù màu: viền/mắt Bóng #00B3FF, cảnh báo #FFFFFF + ⚠, đèn tắt xẹp 20% + rách, lưu cài đặt | `tests/ui.test.mjs` + so sánh cùng góc [cb-off-normal.png](screenshots/cb-off-normal.png) ↔ [cb-off-colorblind.png](screenshots/cb-off-colorblind.png); nút ở menu [menu-cb-toggle.png](screenshots/menu-cb-toggle.png) | Đạt (sau khi sửa lỗi người dùng báo — phase-3.md §6) |
 | §7 Contract v1.2 (tuning, snapshot, scenario, sự kiện, `drain`) | `unit.test.mjs`, `cli.test.mjs`, Q-series | Đạt |
 | DoD: ADR | [docs/adr/0001](../../adr/0001-lantern-fuel-and-dawn-win.md) | Đạt |
 | DoD: test cũ cập nhật có lý do, không skip | phase-3.md §4 (10 test, đánh dấu `[T03]`) | Đạt |
