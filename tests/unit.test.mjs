@@ -9,7 +9,7 @@ import { ROOT } from './helpers.mjs';
 
 test('game.contract.json declares exactly the tuning the game uses', () => {
   const c = JSON.parse(fs.readFileSync(path.join(ROOT, 'game.contract.json'), 'utf8'));
-  assert.equal(c.contract_version, '1.2');
+  assert.equal(c.contract_version, '1.3');
   for (const k of ['team', 'build_cmd', 'run_cmd', 'headless_cmd']) assert.equal(typeof c[k], 'string', k);
   assert.deepEqual(c.tuning, JSON.parse(JSON.stringify(TUNING)));
 });
