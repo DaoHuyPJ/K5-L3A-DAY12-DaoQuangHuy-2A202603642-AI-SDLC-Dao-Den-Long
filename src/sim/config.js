@@ -1,4 +1,4 @@
-// Single source of truth for every gameplay number — Ticket-02 standard values (contract v1.1).
+// Single source of truth for every gameplay number — Ticket-02 standard values + Ticket-03 changes (contract v1.2).
 // game.contract.json "tuning" MUST equal TUNING (enforced by tests/unit.test.mjs).
 
 export const TICK_RATE = 60;
@@ -12,9 +12,9 @@ export const TUNING = Object.freeze({
   interact_radius: 2,
   pulse_cost: 3,
   pulse_radius: 5,
-  night1_duration_s: 300,
-  night2_duration_s: 330,
-  night3_duration_s: 360,
+  night1_duration_s: 240, // Ticket-03 [THAY THẾ] 300 -> 240
+  night2_duration_s: 270, // 330 -> 270
+  night3_duration_s: 300, // 360 -> 300
   flames: 3,
   invuln_s: 1.5,
   hit_drop_ratio: 0.5,
@@ -28,11 +28,23 @@ export const TUNING = Object.freeze({
   dash_speed: 14,
   dash_duration_s: 0.2,
   dash_cooldown_s: 1.5,
+  // Ticket-03 (contract v1.2)
+  fuel_max: 100,
+  fuel_decay_per_s: 1,
+  fuel_per_mote: 10,
+  relight_cost: 5,
+  win_ratio: 0.6,
+  drain_per_s: 5,
+  low_fuel_threshold: 30,
+  capacity_max: 20,
   score: Object.freeze({
-    per_mote: 10, // per mote DEPOSITED
-    per_lantern: 100,
-    per_stun: 5, // per shade hit by a pulse (each time, even if already stunned)
-    per_second_left: 2,
+    per_mote: 5, // Ticket-03: per mote put into a lantern (light, relight or refuel)
+    per_lantern: 100, // first light
+    per_relight: 40,
+    per_stun: 5, // per shade hit by a pulse
+    per_stun_drain: 15, // total for a shade that was draining right before the pulse
+    per_second_left: 0, // Ticket-03: time bonus removed
+    per_lit_at_dawn: 50, // + floor(fuel), on win only
     per_flame_left: 50,
   }),
 });
@@ -73,6 +85,7 @@ export const RULES = Object.freeze({
   recoil_ticks: 60,
   recoil_m: 2,
   expel_ticks: 30,
+  drain_reach: 2, // Ticket-03: shade starts draining within 2 m (XZ) of a weak lantern
   fall_y: -10,
   respawn_wait: 60,
   drifter_speed: 7,

@@ -4,7 +4,7 @@
 export class FormatError extends Error {}
 
 export const BUTTONS = ['jump', 'interact', 'pulse', 'dash', 'pause'];
-export const SHADE_STATES = ['spawning', 'wander', 'chase', 'recoil', 'stunned'];
+export const SHADE_STATES = ['spawning', 'wander', 'chase', 'recoil', 'stunned', 'drain'];
 export const DRIFTER_STATES = ['idle', 'chase', 'flee', 'removed'];
 
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -91,7 +91,7 @@ export function parseScenario(obj) {
       if (!isVec3(p.pos)) fail('scenario: player.pos must be [x, y, z]');
       s.player.pos = [...p.pos];
     }
-    for (const k of ['carried', 'flames', 'invuln_ticks', 'dash_cd_ticks', 'pulse_cd_ticks', 'charm_ticks']) {
+    for (const k of ['carried', 'flames', 'invuln_ticks', 'dash_cd_ticks', 'pulse_cd_ticks', 'charm_ticks', 'successful_lights']) {
       const v = optTicks(p, k, 'player');
       if (v !== undefined) s.player[k] = v;
     }
@@ -124,6 +124,10 @@ export function parseScenario(obj) {
         o.state = sh.state;
       }
       o.state_ticks_left = optTicks(sh, 'state_ticks_left', `shades[${i}]`);
+      if ('target_lantern_id' in sh) {
+        if (typeof sh.target_lantern_id !== 'string') fail(`scenario: shades[${i}].target_lantern_id must be a string`);
+        o.target_lantern_id = sh.target_lantern_id;
+      }
       return o;
     });
   }
@@ -166,6 +170,11 @@ export function parseScenario(obj) {
       }
       o.deposited = optTicks(l, 'deposited', `lanterns[${i}]`);
       o.lit = optBool(l, 'lit', `lanterns[${i}]`);
+      o.ever_lit = optBool(l, 'ever_lit', `lanterns[${i}]`);
+      if ('fuel' in l) {
+        if (!isNum(l.fuel) || l.fuel < 0 || l.fuel > 100) fail(`scenario: lanterns[${i}].fuel must be a number in [0, 100]`);
+        o.fuel = l.fuel;
+      }
       return o;
     });
   }
