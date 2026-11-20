@@ -6,6 +6,7 @@ import { capacity, createGame, lightCost, makeRng, step } from '../sim/world.js'
 import { Sfx } from './sfx.js';
 import { blinkOn, lanternLook } from './lanternLook.js';
 import { C } from './palette.js';
+import { BENCH, benchCamera, benchStats, createBenchGame } from '../sim/bench.js';
 
 const $ = (id) => document.getElementById(id);
 const DT = 1 / TICK_RATE;
@@ -219,34 +220,99 @@ const orbiters = Array.from({ length: TUNING.carry_capacity }, () => {
 });
 
 // ---------- dynamic entities ----------
-const views = { motes: new Map(), shades: new Map(), drifters: new Map(), charms: new Map() };
+const views = { drifters: new Map(), charms: new Map() }; // shades + motes are instanced (see INST below)
 const moteGeo = new THREE.SphereGeometry(0.1, 8, 6);
 const haloGeo = new THREE.SphereGeometry(0.3, 10, 8);
 const shadeGeo = new THREE.SphereGeometry(0.75, 18, 14);
 const eyeGeo = new THREE.SphereGeometry(0.09, 8, 6);
+// ---------- Phase 4 perf: shades and motes drawn as InstancedMesh (≈6 draw calls instead of ≈1000 in the benchmark) ----------
+const INST_CAP = 512;
+function instanced(geo, material, cap) {
+  const m = new THREE.InstancedMesh(geo, material, cap);
+  m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  m.count = 0;
+  m.frustumCulled = false; // instances span the whole island
+  scene.add(m);
+  return m;
+}
+const tint = (hex, k = 1) => new THREE.Color(hex).multiplyScalar(k);
+const INST = {};
+function initInstances() {
+  INST.body = instanced(shadeGeo, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1 }), INST_CAP);
+  INST.rim = instanced(shadeGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.BackSide, transparent: true, opacity: 0.9 }), INST_CAP);
+  INST.eyes = instanced(eyeGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }), INST_CAP * 2);
+  INST.moteCore = instanced(moteGeo, moteCoreMat, INST_CAP);
+  INST.moteHalo = instanced(haloGeo, moteHaloMat, INST_CAP);
+  const white = new THREE.Color(0xffffff);
+  for (let i = 0; i < INST_CAP; i++) {
+    INST.body.setColorAt(i, white);
+    INST.rim.setColorAt(i, white);
+    INST.eyes.setColorAt(2 * i, white);
+    INST.eyes.setColorAt(2 * i + 1, white);
+  }
+}
+const dummy = new THREE.Object3D();
+const m4 = new THREE.Matrix4();
+const EYE_L = new THREE.Matrix4().makeTranslation(-0.22, 0.2, 0.64);
+const EYE_R = new THREE.Matrix4().makeTranslation(0.22, 0.2, 0.64);
+function drawShades(t, p) {
+  const n = Math.min(game.shades.length, INST_CAP);
+  const rimHex = settings.colorBlind ? C.cbShadeRim : C.shadeRim;
+  const cBody = tint(C.shade), cBodyStun = tint(C.shadeStun), cRim = tint(rimHex), cRimStun = tint(rimHex, 0.35);
+  const cEye = tint(settings.colorBlind ? C.cbShadeRim : 0xd9b8ff);
+  for (let i = 0; i < n; i++) {
+    const s = game.shades[i];
+    const stunned = s.state === 'stunned';
+    const k = s.state === 'spawning' ? 0.4 + 0.6 * (1 - s.stateTicks / RULES.shade_spawn_ticks) : stunned ? 0.85 + Math.sin(t * 20) * 0.05 : 1;
+    dummy.position.set(s.pos[0], s.pos[1] + Math.sin(t * 3 + s.pos[2]) * 0.1, s.pos[2]);
+    dummy.rotation.set(0, 0, 0);
+    dummy.lookAt(p.pos[0], s.pos[1], p.pos[2]);
+    dummy.scale.set(k, k * 1.15, k);
+    dummy.updateMatrix();
+    INST.body.setMatrixAt(i, dummy.matrix);
+    dummy.scale.set(k * 1.09, k * 1.25, k * 1.09);
+    dummy.updateMatrix();
+    INST.rim.setMatrixAt(i, dummy.matrix);
+    dummy.scale.setScalar(k);
+    dummy.updateMatrix();
+    INST.eyes.setMatrixAt(2 * i, m4.multiplyMatrices(dummy.matrix, EYE_L));
+    INST.eyes.setMatrixAt(2 * i + 1, m4.multiplyMatrices(dummy.matrix, EYE_R));
+    INST.body.setColorAt(i, stunned ? cBodyStun : cBody);
+    INST.rim.setColorAt(i, stunned ? cRimStun : cRim);
+    INST.eyes.setColorAt(2 * i, cEye);
+    INST.eyes.setColorAt(2 * i + 1, cEye);
+  }
+  INST.body.count = INST.rim.count = n;
+  INST.eyes.count = 2 * n;
+  for (const m of [INST.body, INST.rim, INST.eyes]) {
+    m.instanceMatrix.needsUpdate = true;
+    m.instanceColor.needsUpdate = true;
+  }
+}
+function drawMotes(t) {
+  const n = Math.min(game.motes.length, INST_CAP);
+  for (let i = 0; i < n; i++) {
+    const m = game.motes[i];
+    const visible = m.ttl === null || m.ttl > 90 || Math.floor(t * 8) % 2 === 0; // dropped motes blink before vanishing
+    dummy.position.set(m.pos[0], m.pos[1] + 0.8 + Math.sin(t * 2.5 + m.pos[0]) * 0.25, m.pos[2]);
+    dummy.rotation.set(0, 0, 0);
+    dummy.scale.setScalar(visible ? 1 : 0);
+    dummy.updateMatrix();
+    INST.moteCore.setMatrixAt(i, dummy.matrix);
+    INST.moteHalo.setMatrixAt(i, dummy.matrix);
+  }
+  INST.moteCore.count = INST.moteHalo.count = n;
+  INST.moteCore.instanceMatrix.needsUpdate = INST.moteHalo.instanceMatrix.needsUpdate = true;
+}
+
+const SHADE_MAT = {
+  body: mat(C.shade, { roughness: 1 }),
+  bodyStun: mat(C.shadeStun, { roughness: 1 }),
+  rim: new THREE.MeshBasicMaterial({ color: C.shadeRim, side: THREE.BackSide, transparent: true, opacity: 0.9 }),
+  rimStun: new THREE.MeshBasicMaterial({ color: C.shadeRim, side: THREE.BackSide, transparent: true, opacity: 0.3 }),
+  eye: new THREE.MeshBasicMaterial({ color: 0xd9b8ff }),
+};
 const makers = {
-  motes() {
-    const g = new THREE.Group();
-    g.add(new THREE.Mesh(moteGeo, moteCoreMat), new THREE.Mesh(haloGeo, moteHaloMat));
-    return g;
-  },
-  shades() {
-    const g = new THREE.Group();
-    const bodyMat = mat(C.shade, { roughness: 1 });
-    const body = new THREE.Mesh(shadeGeo, bodyMat);
-    body.scale.set(1, 1.15, 1);
-    const rimMat = new THREE.MeshBasicMaterial({ color: C.shadeRim, side: THREE.BackSide, transparent: true, opacity: 0.9 });
-    const rim = new THREE.Mesh(shadeGeo, rimMat);
-    rim.scale.set(1.09, 1.25, 1.09);
-    const eyeMat = new THREE.MeshBasicMaterial({ color: 0xd9b8ff });
-    g.userData.eyeMat = eyeMat;
-    const e1 = new THREE.Mesh(eyeGeo, eyeMat), e2 = new THREE.Mesh(eyeGeo, eyeMat);
-    e1.position.set(-0.22, 0.2, 0.64);
-    e2.position.set(0.22, 0.2, 0.64);
-    g.add(body, rim, e1, e2);
-    g.userData = { ...g.userData, bodyMat, rimMat };
-    return g;
-  },
   drifters() {
     const geo = new THREE.PlaneGeometry(2.4, 0.35, 16, 1);
     const m = new THREE.Mesh(geo, mat(C.drifter, { side: THREE.DoubleSide, emissive: C.drifter, emissiveIntensity: 0.25, transparent: true, opacity: 0.9 }));
@@ -285,6 +351,8 @@ function clearEntities() {
     views[k].clear();
   }
 }
+
+initInstances();
 
 // effects: pulse ring + wind leaves
 const pulseRing = new THREE.Mesh(new THREE.RingGeometry(0.85, 1, 64), new THREE.MeshBasicMaterial({ color: C.lit, transparent: true, opacity: 0, side: THREE.DoubleSide }));
@@ -524,6 +592,7 @@ const perf = { step: 0, draw: 0, render: 0 };
 let acc = 0, last = performance.now(), fpsFrames = 0, fpsT = 0, fpsSamples = [];
 let prevGrounded = true, lastSecond = -1, windWarned = false;
 function frame(now) {
+  if (bench) benchFrame(now);
   const dt = Math.min(0.25, (now - last) / 1000);
   last = now;
   camYaw += ((keys.has('ArrowLeft') ? 1 : 0) - (keys.has('ArrowRight') ? 1 : 0)) * 120 * dt;
@@ -580,6 +649,11 @@ function draw(t, dt) {
   if (snapCam || camera.position.distanceTo(tmpV) > 25) camera.position.copy(tmpV);
   else camera.position.lerp(tmpV, 1 - Math.pow(1e-5, dt));
   snapCam = false;
+  if (bench && bench.start !== null) {
+    const c = benchCamera((performance.now() - bench.start) / 1000);
+    camera.position.set(c[0], c[1], c[2]);
+    camera.lookAt(0, 0, 0);
+  }
   camera.lookAt(p.pos[0] + Math.sin(th) * 2, p.pos[1] + 1.2, p.pos[2] + Math.cos(th) * 2);
 
   let lit = 0;
@@ -624,24 +698,8 @@ function draw(t, dt) {
   }
   ambient.intensity = 0.15 + 0.55 * (lit / game.lanterns.length);
 
-  sync('motes', game.motes);
-  for (const m of game.motes) {
-    const v = views.motes.get(m.id);
-    v.position.set(m.pos[0], m.pos[1] + 0.8 + Math.sin(t * 2.5 + m.pos[0]) * 0.25, m.pos[2]);
-    v.visible = m.ttl === null || m.ttl > 90 || Math.floor(t * 8) % 2 === 0;
-  }
-  sync('shades', game.shades);
-  for (const s of game.shades) {
-    const v = views.shades.get(s.id);
-    v.position.set(s.pos[0], s.pos[1] + Math.sin(t * 3 + s.pos[2]) * 0.1, s.pos[2]);
-    v.lookAt(p.pos[0], s.pos[1], p.pos[2]);
-    const stunned = s.state === 'stunned';
-    v.userData.bodyMat.color.setHex(stunned ? C.shadeStun : C.shade);
-    v.userData.rimMat.opacity = stunned ? 0.3 : 0.9;
-    v.userData.rimMat.color.setHex(settings.colorBlind ? C.cbShadeRim : C.shadeRim);
-    v.userData.eyeMat.color.setHex(settings.colorBlind ? C.cbShadeRim : 0xd9b8ff);
-    v.scale.setScalar(s.state === 'spawning' ? 0.4 + 0.6 * (1 - s.stateTicks / RULES.shade_spawn_ticks) : stunned ? 0.85 + Math.sin(t * 20) * 0.05 : 1);
-  }
+  drawMotes(t);
+  drawShades(t, p);
   sync('drifters', game.drifters.filter((d) => d.state !== 'removed'));
   for (const d of game.drifters) {
     const v = views.drifters.get(d.id);
@@ -696,24 +754,31 @@ function draw(t, dt) {
 
 const bar = $('h-bar');
 const barCount = document.createElement('b');
+// write DOM text only when it changes (per-frame writes force layout work and caused frame-time spikes)
+const setText = (el, txt) => {
+  if (el._t !== txt) {
+    el._t = txt;
+    el.textContent = txt;
+  }
+};
 function drawHud(lit) {
   const p = game.player;
   const secs = Math.ceil(game.ticksLeft / TICK_RATE);
-  $('h-flames').textContent = '🔥'.repeat(p.flames) + '🕯️'.repeat(Math.max(0, TUNING.flames - p.flames));
-  $('h-time').textContent = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
+  setText($('h-flames'), '🔥'.repeat(p.flames) + '🕯️'.repeat(Math.max(0, TUNING.flames - p.flames)));
+  const clock = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
+  setText($('h-time'), secs <= 30 && settings.colorBlind ? `⚠ ${clock}` : clock);
   $('h-time').classList.toggle('danger', secs <= 30);
-  if (secs <= 30 && settings.colorBlind) $('h-time').textContent = `⚠ ${$('h-time').textContent}`;
   if (mode === 'playing' && secs <= 10 && secs !== lastSecond && secs > 0) sfx.countdown();
   lastSecond = secs;
-  $('h-lanterns').textContent = `Đèn ${lit}/${game.lanterns.length} (cần ${needLit()} lúc bình minh)`;
-  $('h-score').textContent = `Điểm ${totalScore + game.score}`;
-  $('h-night').textContent = `Đêm ${night} · ${NIGHTS[night].name}`;
+  setText($('h-lanterns'), `Đèn ${lit}/${game.lanterns.length} (cần ${needLit()} lúc bình minh)`);
+  setText($('h-score'), `Điểm ${totalScore + game.score}`);
+  setText($('h-night'), `Đêm ${night} · ${NIGHTS[night].name}`);
   const cap = capacity(game);
   if (bar.querySelectorAll('i').length !== cap) {
     bar.replaceChildren(...Array.from({ length: cap }, () => document.createElement('i')), barCount);
   }
   bar.querySelectorAll('i').forEach((c, i) => c.classList.toggle('on', i < p.carried));
-  barCount.textContent = `${p.carried}/${cap}`;
+  setText(barCount, `${p.carried}/${cap}`);
   const cd = (id, left, total, usable) => {
     $(id).querySelector('.fill').style.height = `${(left / total) * 100}%`;
     $(id).classList.toggle('off', !usable);
@@ -721,7 +786,7 @@ function drawHud(lit) {
   cd('cd-dash', p.charm > 0 ? 0 : p.dashCd, RULES.dash_cd, p.dashCd === 0 || p.charm > 0);
   cd('cd-pulse', p.pulseCd, RULES.pulse_cd, p.pulseCd === 0 && p.carried >= TUNING.pulse_cost);
   $('h-charm').hidden = p.charm === 0;
-  if (p.charm > 0) $('h-charm').textContent = `Bùa Gió ${(p.charm / TICK_RATE).toFixed(1)}s`;
+  if (p.charm > 0) setText($('h-charm'), `Bùa Gió ${(p.charm / TICK_RATE).toFixed(1)}s`);
 
   // prompt for the lantern E would use (unlit, or lit and not full); arrow to the nearest unlit lantern
   const FULL = TUNING.fuel_max * TICK_RATE;
@@ -740,9 +805,9 @@ function drawHud(lit) {
   const prompt = $('h-prompt');
   prompt.hidden = !(near && nearD <= TUNING.interact_radius);
   if (!prompt.hidden) {
-    prompt.textContent = near.lit
+    setText(prompt, near.lit
       ? `E — Châm dầu (${Math.floor(near.fuelT / TICK_RATE)}/${TUNING.fuel_max})`
-      : `E — Nạp ánh sáng (${near.deposited}/${lightCost(game, near)})`;
+      : `E — Nạp ánh sáng (${near.deposited}/${lightCost(game, near)})`);
   }
   const arrow = $('h-arrow');
   arrow.hidden = true;
@@ -765,6 +830,37 @@ function drawHud(lit) {
   }
 }
 
+// ---------- Ticket-04 §1 benchmark mode (/?benchmark&seed=42&duration=30), driven by scripts/bench.mjs ----------
+let bench = null;
+function startBenchmark(seed, duration) {
+  game = createBenchGame(seed);
+  night = 1;
+  buildWorld(1);
+  clearEntities();
+  mode = 'playing';
+  show(null);
+  bench = { seed, duration, start: null, last: 0, dts: [], firstFrameEpoch: null, done: false };
+  window.__benchResult = null;
+}
+function benchFrame(now) {
+  if (bench.start === null) {
+    bench.start = now;
+    bench.last = now;
+    bench.firstFrameEpoch = performance.timeOrigin + now; // first frame of the bench scene
+    return;
+  }
+  const dt = now - bench.last;
+  bench.last = now;
+  const t = now - bench.start;
+  if (t < BENCH.warmupMs || bench.done) return; // 3 s warm-up is not measured
+  if (t < BENCH.warmupMs + bench.duration * 1000) {
+    bench.dts.push(dt);
+    return;
+  }
+  bench.done = true;
+  window.__benchResult = { ...benchStats(bench.dts), first_frame_epoch_ms: bench.firstFrameEpoch, seed: bench.seed, duration_s: bench.duration, viewport: `${innerWidth}x${innerHeight}` };
+}
+
 // idle preview behind the menu
 game = createGame({ seed: 7, night: 1 });
 buildWorld(1);
@@ -772,6 +868,7 @@ show('scr-menu');
 $('fps').hidden = !params.has('fps') && !params.has('bench');
 requestAnimationFrame(frame);
 
+if (params.has('benchmark')) startBenchmark(Number(params.get('seed') || 42), Number(params.get('duration') || 30));
 // ?autostart[&night=N&lit=K&carried=C&yaw=D] skips menus (used by scripts for screenshots / FPS proof)
 if (params.has('autostart') || params.has('bench')) {
   prepareNight(Number(params.get('night') || 1));
