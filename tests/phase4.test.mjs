@@ -148,3 +148,27 @@ test('game.contract.json v1.3 declares bench_cmd and soak_cmd that exist', () =>
   assert.equal(c.run_cmd, 'node server.js');
   for (const f of ['scripts/bench.mjs', 'scripts/soak.mjs', 'server.js']) assert.ok(fs.existsSync(path.join(ROOT, f)), f);
 });
+
+test('server API saves a Vietnamese name (UTF-8 body) and the export keeps rank order', async () => {
+  const { spawn } = await import('node:child_process');
+  const dir = tmp();
+  const env = { ...process.env, DDL_LEADERBOARD: path.join(dir, 'lb.json'), PORT: '8197' };
+  const srv = spawn(process.execPath, [path.join(ROOT, 'server.js')], { env, stdio: 'ignore' });
+  try {
+    let ok = false;
+    for (let i = 0; i < 40 && !ok; i++) {
+      await new Promise((r) => setTimeout(r, 100));
+      ok = await fetch('http://127.0.0.1:8197/api/leaderboard').then((r) => r.ok, () => false);
+    }
+    const post = (e) => fetch('http://127.0.0.1:8197/api/leaderboard', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(e) });
+    assert.equal((await post({ name: 'Mây', score: 900, nights_won: 2, seed: 1 })).status, 200);
+    assert.equal((await post({ name: 'ab', score: 5, nights_won: 0, seed: 2 })).status, 400);
+    assert.equal((await post({ name: 'Đào_Huy', score: 1200, nights_won: 3, seed: 3 })).status, 200);
+  } finally {
+    srv.kill();
+  }
+  const out = path.join(dir, 'out.json');
+  const r = spawnSync(process.execPath, [path.join(ROOT, 'server.js'), '--export-leaderboard', out], { encoding: 'utf8', env });
+  assert.equal(r.status, 0, r.stderr);
+  assert.deepEqual(JSON.parse(fs.readFileSync(out, 'utf8')).entries.map((e) => e.name), ['Đào_Huy', 'Mây']);
+});

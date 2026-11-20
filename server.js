@@ -45,14 +45,16 @@ http
     if (url === '/api/leaderboard') {
       if (req.method === 'GET') return json(res, 200, { entries: readBoard() });
       if (req.method === 'POST') {
-        let body = '';
+        const chunks = [];
+        let size = 0;
         req.on('data', (c) => {
-          body += c;
-          if (body.length > 10000) req.destroy();
+          chunks.push(c);
+          size += c.length;
+          if (size > 10000) req.destroy();
         });
         req.on('end', () => {
           try {
-            const e = JSON.parse(body);
+            const e = JSON.parse(Buffer.concat(chunks).toString('utf8')); // decode once: multi-byte chars may span chunks
             const entry = makeEntry({ name: e.name, score: e.score, nights_won: e.nights_won, seed: e.seed });
             const entries = addEntry(readBoard(), entry);
             writeBoard(entries);
