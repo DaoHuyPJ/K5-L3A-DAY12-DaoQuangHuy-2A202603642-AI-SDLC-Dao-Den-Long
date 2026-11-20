@@ -1,7 +1,7 @@
 # SUBMISSION checklist — kết quả kiểm tự động
 
-> Sinh bởi `node scripts/submission-check.mjs --online` lúc 2026-11-20T14:04:28.109Z ở commit `edd54a4`. Không sửa tay.
-> Nguồn: [docs/lab/SUBMISSION.md §7](../lab/SUBMISSION.md). PASS 31 · FAIL 2 · TODO 3 · MANUAL 0
+> Sinh bởi `node scripts/submission-check.mjs --online` lúc 2026-11-20T14:13:21.737Z ở commit `6ead8ec`. Không sửa tay.
+> Nguồn: [docs/lab/SUBMISSION.md §7](../lab/SUBMISSION.md). PASS 33 · FAIL 1 · TODO 2 · MANUAL 0
 
 | Nhóm | Mục | Trạng thái | Chi tiết |
 |---|---|---|---|
@@ -13,7 +13,7 @@
 | Sản phẩm | Tag phase-1 | ✅ PASS | có trên GitHub |
 | Sản phẩm | Tag phase-2 | ✅ PASS | có trên GitHub |
 | Sản phẩm | Tag phase-3 | ✅ PASS | có trên GitHub |
-| Sản phẩm | Tag phase-4 | ⏳ TODO | chưa có |
+| Sản phẩm | Tag phase-4 | ✅ PASS | có trên GitHub |
 | Sản phẩm | Release v1.0.0 có bản chạy được | ⏳ TODO | chưa có |
 | Bằng chứng | Phase 1: bảng truy vết + kết quả sinh tự động | ✅ PASS | docs/proof/phase-1/ |
 | Bằng chứng | Phase 1: giả định + tiêu chí nghiệm thu | ✅ PASS | docs/notes/phase-1.md |
@@ -40,4 +40,4 @@
 | Video/giấy phép/bảo mật | Video .mp4 < 5 phút, link ở đầu README | ⏳ TODO | Phase 4 (người làm bài quay màn hình) |
 | Video/giấy phép/bảo mật | CREDITS + LICENSE | ✅ PASS | CREDITS.md, LICENSE |
 | Video/giấy phép/bảo mật | Không có .env / key trong repo và lịch sử | ✅ PASS | quét toàn bộ lịch sử: không có |
-| Video/giấy phép/bảo mật | game.contract.json "team" có MSSV thật | ❌ FAIL | MSSV-dao-quang-huy |
+| Video/giấy phép/bảo mật | game.contract.json "team" có MSSV thật | ✅ PASS | 2A202603642-dao-quang-huy |
