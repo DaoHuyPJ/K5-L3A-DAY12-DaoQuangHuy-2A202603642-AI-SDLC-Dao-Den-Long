@@ -1,6 +1,6 @@
 {
   "name": "dao-den-long",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Đảo Đèn Lồng — 3D lantern-keeper game (Day 12 AI SDLC lab)",
   "type": "module",
   "private": true,
@@ -11,7 +11,10 @@
     "test": "node --test",
     "headless": "node src/headless.js",
     "verify": "node scripts/verify.mjs",
-    "build:web": "node scripts/build-web.mjs"
+    "build:web": "node scripts/build-web.mjs",
+    "bench": "node scripts/bench.mjs --seed 42 --duration 30 --out bench.json",
+    "soak": "node --expose-gc --no-opt --max-semi-space-size=1 scripts/soak.mjs --seed 7 --nights 10 --out soak.json",
+    "package": "node scripts/package-release.mjs"
   },
   "dependencies": {
     "three": "0.160.0"
