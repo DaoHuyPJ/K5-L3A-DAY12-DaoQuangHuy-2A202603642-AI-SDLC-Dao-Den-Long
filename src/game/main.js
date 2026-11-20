@@ -5,18 +5,12 @@ import { NIGHTS, RULES, TICK_RATE, TUNING } from '../sim/config.js';
 import { createGame, makeRng, step } from '../sim/world.js';
 import { Sfx } from './sfx.js';
 import { lanternLook } from './lanternLook.js';
+import { C } from './palette.js';
 
 const $ = (id) => document.getElementById(id);
 const DT = 1 / TICK_RATE;
 const params = new URLSearchParams(location.search);
 
-// Ticket-02 standard palette
-const C = {
-  sky: 0x0e1430, fog: 0x1b2350, grass: 0x2f5d50, sand: 0xc9b48a, wood: 0x6b4a2f, sea: 0x12384a,
-  lit: 0xffb347, core: 0xffe9b0, off: 0x5b5f6e, moteCore: 0xfff6c2, moteHalo: 0xffe58a,
-  shade: 0x120a1a, shadeRim: 0x7a3cff, shadeStun: 0x3a3450, shirt: 0xe8e2d0, scarf: 0xc8102e,
-  gold: 0xf2c14e, drifter: 0x8fa3b8,
-};
 
 // ---------- settings (saved between sessions) ----------
 const settings = { volume: 0.7, sens: 0.25 };
@@ -112,7 +106,7 @@ function buildWorld(night) {
     bridge.position.set(35, -0.15, 0);
     world.add(bridge);
     for (let x = 27; x <= 43; x += 2) {
-      const plank = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.05, 4.1), mat(0x4e3420));
+      const plank = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.05, 4.1), mat(C.wood));
       plank.position.set(x, 0.01, 0);
       world.add(plank);
     }
@@ -124,11 +118,11 @@ function buildWorld(night) {
     sh.absarc(0, 0, 24, 0, Math.PI, false);
     sh.lineTo(-12, 0);
     sh.absarc(0, 0, 12, Math.PI, 0, true);
-    const t1 = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 3, bevelEnabled: false, curveSegments: 48 }), mat(0x3a6b5c));
+    const t1 = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 3, bevelEnabled: false, curveSegments: 48 }), mat(C.grass));
     t1.rotation.x = Math.PI / 2;
     t1.position.y = 3;
     world.add(t1);
-    const t2 = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 6, 48), mat(0x467a6a));
+    const t2 = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 6, 48), mat(C.grass));
     t2.position.y = 3;
     world.add(t2);
     const tower = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 8, 24), mat(C.wood));
@@ -374,6 +368,7 @@ function prepareNight(n) {
   buildWorld(n);
   clearEntities();
   camYaw = 0;
+  snapCam = true;
   $('i-night').textContent = `Đêm ${n}`;
   $('i-name').textContent = NIGHTS[n].name;
   $('i-quote').textContent = QUOTES[n];
@@ -528,6 +523,7 @@ function frame(now) {
 }
 
 const tmpV = new THREE.Vector3();
+let snapCam = true;
 function draw(t, dt) {
   const p = game.player;
   player.position.set(p.pos[0], p.pos[1], p.pos[2]);
@@ -546,7 +542,11 @@ function draw(t, dt) {
 
   const th = (camYaw * Math.PI) / 180, ph = (camPitch * Math.PI) / 180;
   const back = Math.cos(ph) * camDist, up = Math.sin(ph) * camDist + 1.2;
-  camera.position.lerp(tmpV.set(p.pos[0] - Math.sin(th) * back, p.pos[1] + up, p.pos[2] - Math.cos(th) * back), 1 - Math.pow(1e-5, dt));
+  tmpV.set(p.pos[0] - Math.sin(th) * back, p.pos[1] + up, p.pos[2] - Math.cos(th) * back);
+  // snap (no sweep across the map) on a new night, on respawn, or on the first frame
+  if (snapCam || camera.position.distanceTo(tmpV) > 25) camera.position.copy(tmpV);
+  else camera.position.lerp(tmpV, 1 - Math.pow(1e-5, dt));
+  snapCam = false;
   camera.lookAt(p.pos[0] + Math.sin(th) * 2, p.pos[1] + 1.2, p.pos[2] + Math.cos(th) * 2);
 
   let lit = 0;
