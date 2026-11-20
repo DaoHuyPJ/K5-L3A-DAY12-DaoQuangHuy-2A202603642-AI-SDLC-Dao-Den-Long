@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Đảo Đèn Lồng</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0614; font-family: system-ui, sans-serif; color: #ffe9c4; }
+    canvas { display: block; }
+    #hud { position: fixed; top: 12px; left: 12px; right: 12px; display: flex; gap: 18px; flex-wrap: wrap; pointer-events: none;
+           font-size: 17px; text-shadow: 0 1px 3px #000; }
+    #hud .box { background: rgba(20, 10, 35, .55); border: 1px solid rgba(255, 190, 110, .25); border-radius: 10px; padding: 6px 12px; }
+    #hint { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 13px; opacity: .75;
+            background: rgba(20,10,35,.5); padding: 5px 12px; border-radius: 8px; pointer-events: none; text-align: center; }
+    #toast { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); font-size: 20px; color: #ffcf7a;
+             text-shadow: 0 0 10px #ff9a2e; transition: opacity .4s; opacity: 0; pointer-events: none; }
+    #overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(8, 4, 16, .72); }
+    #overlay.hidden { display: none; }
+    #panel { text-align: center; max-width: 520px; padding: 28px 32px; border-radius: 16px; background: rgba(30, 16, 50, .9);
+             border: 1px solid rgba(255, 190, 110, .35); box-shadow: 0 0 40px rgba(255, 150, 60, .2); }
+    #panel h1 { margin: 0 0 8px; color: #ffcf7a; }
+    #panel p { line-height: 1.5; }
+    #panel button { font-size: 18px; padding: 10px 26px; border-radius: 10px; border: 0; background: #ffb347; color: #2a1338; cursor: pointer; font-weight: 700; }
+    .warn { color: #c79bff; }
+  </style>
+  <script type="importmap">{ "imports": { "three": "/node_modules/three/build/three.module.js" } }</script>
+</head>
+<body>
+  <div id="hud">
+    <div class="box" id="h-flames"></div>
+    <div class="box" id="h-carried"></div>
+    <div class="box" id="h-lanterns"></div>
+    <div class="box" id="h-time"></div>
+    <div class="box" id="h-score"></div>
+    <div class="box" id="h-pulse"></div>
+  </div>
+  <div id="toast"></div>
+  <div id="hint">WASD di chuyển · Chuột kéo / ← → xoay camera · Space nhảy · E nạp đèn · F tỏa sáng · R chơi lại</div>
+  <div id="overlay">
+    <div id="panel">
+      <h1 id="o-title">Đảo Đèn Lồng</h1>
+      <p id="o-text">Đêm 1 – Đảo Bến. Sương đen đã nuốt ánh sáng của đảo.<br />
+        Gom <b>đom đóm</b>, mang về thắp <b>5 Đèn Lồng Lớn</b> trước bình minh.<br />
+        <span class="warn">Bóng Mực</span> sợ đèn đã thắp — và sợ ánh sáng của bạn (F).</p>
+      <button id="o-btn">Bắt đầu</button>
+    </div>
+  </div>
+  <script type="module" src="/src/game/main.js"></script>
+</body>
+</html>
